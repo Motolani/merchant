@@ -16,24 +16,44 @@ import IconTwo from 'react-native-vector-icons/MaterialCommunityIcons';
 
 
 const Payment = ({ navigation }) => {
-    const { initiatePayment } = useContext(AuthContext);
+    const { initiatePayment, statusCheck, message, entSignOut } = useContext(AuthContext);
     const [ loading, setLoading ] = useState(false);
+    const [ loadingCheck, setLoadingCheck ] = useState(false);
     const [ sender, setSender ] = useState('');
     const [ amount, setAmount ] = useState('');
+    const [ reference, setReference ] = useState('');
+    const [ checkingReference, setCheckingReference ] = useState('');
+    const [ resultMess, setResultMess ] = useState('');
+    const [ checkStat, setCheckStat ] = useState('');
+    const [ done, setDone ] = useState(false);
     const [ pin, setPin ] = useState(null);
     const [ withPin, setWithPin ] = useState(false);
     const [visible, setVisible] = useState(false);
     const [visibleError, setVisibleError] = useState(false);
     const showModal = () => setVisible(true);
-    const hideModal = () => {
+    const hideModalDone = () => {
         setVisible(false);
+        setReference('')
         setSender('')
         setAmount('')
         setPin('')
+        setCheckStat('')
+        setDone(false)
+    }
+
+    const hideModal = () => {
+        setVisible(false);
+        setReference('')
+        setSender('')
+        setAmount('')
+        setPin('')
+        setDone(false)
+
     }
     const showErrorModal = () => setVisibleError(true);
     const hideErrorModal = () => {
         setVisibleError(false);
+        setReference('')
         setSender('')
         setAmount('')
         setPin('')
@@ -61,21 +81,78 @@ const Payment = ({ navigation }) => {
         console.log(sender)
         console.log(amount)
         console.log(pin)
-        $result = await initiatePayment(sender, amount, pin)
+
+        result = await initiatePayment(sender, amount, pin)
+        console.log(result)
         setLoading(false)
 
-        if($result.status == 200){
+        
+        if(result.status == 200){
+            setReference(result.reference)
             showModal()
-        }else if($result.status == 300){
+        }else if(result.status == 302){
             entSignOut()
             return [
                 alert("Token Expired") 
             ]
+        }else if(result.status == 300){
+            console.log('inside eeelse if')
+            showErrorModal()
         }else{
-            showErrorModal();
+            console.log('inside else')
+            return [
+                alert(message) 
+            ]
         }
         
     }
+    const checkStatus = async() => {
+        setLoadingCheck(true)
+
+            setCheckingReference(reference)
+
+        if(reference != ''){
+            console.log(reference)
+            const result = await statusCheck(reference)
+
+            setCheckStat(result.status)
+
+            if(result.status == 200){
+                setLoadingCheck(false)
+                setDone(true)
+                setReference('')
+                return result
+            }else if(result.status == 400){
+                setLoadingCheck(false)
+                return result
+            }else if(result.status == 302){
+                setLoadingCheck(false)
+                setDone(true)
+                setReference('')
+                return result
+            }else{
+                setLoadingCheck(false)
+                setDone(true)
+                setReference('')
+                return result
+            }
+        }
+        
+    }
+
+    // useEffect(() => {
+	// 	// Call getItems initially when the component mounts
+	// 	// checkStatus();
+	// 	// Set up an interval to call getData every five seconds
+	// 	const interval = setInterval(() => {
+	// 		checkStatus();
+	// 	}, 60000);
+	// 	// Clean up the interval when the component unmounts
+	// 	return () => {
+	// 		// clearInterval(setLoadingInterval);
+	// 		clearInterval(interval);
+	// 	};
+	// }, [checkStatus]);
 
     return (
         <PaperProvider>
@@ -147,27 +224,57 @@ const Payment = ({ navigation }) => {
                     <Modal isVisible={visible} >
                         <View style={styles.modal}>
                         <IconTwo name="phone-in-talk" size={60} color="#4BB543" style={styles.modalIcon}/>
-                        <Text variant="labelLarge" style={styles.modalMessage}>Please wait while transaction is being approve via phone call from 012275020 to the senders phone</Text>
-
-                            <View style={styles.modalButtons}>
-                                <View style={styles.modalButtonsOne}>
-                                    <TouchableOpacity>
-                                        <Button icon="phone-check" mode="contained" buttonColor={'#209eda'} >
-                                            Check
-                                        </Button>
-                                    </TouchableOpacity>
-
-                                </View>
-                                 
-                                <View style={styles.modalButtonsTwo}>
-                                    <TouchableOpacity onPress={hideModal}>
+                        {checkStat == '' ?
+                            <Text variant="labelLarge" style={styles.modalMessage}>Please wait while transaction is being approve via phone call from 012275020 to the senders phone</Text>
+                        :checkStat == '400' ?
+                        <View style={styles.theView}>
+                            <Text variant="titleMedium" style={styles.modalMessageSum}> Pending!</Text>
+                            <Text variant="labelLarge" style={styles.modalMessage}> Please Wait while Payment while Sender Approves transaction</Text>
+                        </View>
+                        : checkStat == '200' ?
+                        <View>
+                            <Text variant="titleMedium" style={styles.modalMessmodalMessageSumage}> Successful!</Text>
+                            <Text variant="labelLarge" style={styles.modalMessage}> Payment Initiation Completed</Text>
+                        </View>
+                        :
+                            <View>
+                                <Text variant="titleMedium" style={styles.modalMessageSum}> Failed!</Text>
+                                <Text variant="labelLarge" style={styles.modalMessage}> Payment Initiation Failed, Please try again later</Text>
+                            </View>
+                        }
+                            { done ?
+                                <View style={styles.modalButtonsOkay}>
+                                    <TouchableOpacity onPress={hideModalDone}>
                                         <Button icon="progress-close" mode="contained" buttonColor={'#209eda'}>
-                                            Back
+                                            Okay
                                         </Button>
                                     </TouchableOpacity>    
-                                </View>
-                                 
-                            </View>
+                                </View> :
+                                <View style={styles.modalButtons}>
+                                    <View style={styles.modalButtonsOne}>
+                                        <TouchableOpacity onPress={checkStatus}>
+                                        { loadingCheck ?
+                                            <Button icon="phone-check" mode="contained" buttonColor={'#209eda'} >
+                                                <ActivityIndicator color="white" />
+                                            </Button>:
+                                            <Button icon="phone-check" mode="contained" buttonColor={'#209eda'} >
+                                                Check
+                                            </Button>
+                                        }   
+                                        </TouchableOpacity>
+
+                                    </View>
+                                    
+                                    <View style={styles.modalButtonsTwo}>
+                                        <TouchableOpacity onPress={hideModal}>
+                                            <Button icon="progress-close" mode="contained" buttonColor={'#209eda'}>
+                                                Back
+                                            </Button>
+                                        </TouchableOpacity>    
+                                    </View>
+                                    
+                                </View> 
+                            }
                         </View>
                     </Modal>
 
@@ -217,7 +324,8 @@ const styles = StyleSheet.create({
         // verticalAlign:'center',
         // margin: 20,
         padding: 15,
-        marginVertical: 260,
+        marginVertical: Platform.OS === 'ios' ? 260 : 240,
+        // marginVertical: 260,
         borderRadius: 5,
         borderColor: '#4772E1',
         borderWidth: 1,
@@ -230,11 +338,16 @@ const styles = StyleSheet.create({
     modalButtonsOne:{
         marginRight:10
     },
-    modalButtonsTwo:{
-
+    modalButtonsOkay:{
+        marginTop: 30
     },
     modalErrorMessage:{
         marginBottom: 20
+    },
+    theView:{
+        flex:1,
+        alignContent: 'center',
+        textAlign: 'center',
     },
     inputAmount:{
         width:'90%',

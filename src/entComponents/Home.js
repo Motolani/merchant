@@ -8,75 +8,101 @@ import Feather from "react-native-vector-icons/Feather"
 import { SelectList } from 'react-native-dropdown-select-list';
 import LinearGradient from 'react-native-linear-gradient';
 import { AuthContext } from '../context/AuthContext';
-import { IconButton, MD3Colors, Divider, Card, Button, DataTable, PaperProvider} from 'react-native-paper';
+import { IconButton, MD3Colors, Searchbar, Card, Button, DataTable, PaperProvider} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Ionicons';
 import IconTwo from 'react-native-vector-icons/MaterialCommunityIcons';
 
 
 const Home = ({ navigation }) => {
-    const { msisdn, userToken, user, entSignOut } = useContext(AuthContext);
+    const { transactionsData, user, entSignOut, transactions, transactionsDataStatus } = useContext(AuthContext);
     const [ loading, setLoading ] = useState(false);
     const [page, setPage] = useState(0);
+    const [ transData, setTransData ] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const onChangeSearch = query => setSearchQuery(query);
+
     const [numberOfItemsPerPageList] = useState([5]);
     const [itemsPerPage, onItemsPerPageChange] = useState(
         numberOfItemsPerPageList[0]
     );
-    const [items] = useState([
-        {
-          key: 1,
-          time: '2023-11-23',
-          amount: 'N305',
-          status: 'success',
-        },
-        {
-          key: 2,
-          name: '2023-11-23',
-          amount: 'N305',
-          status: 'success',
-        },
-        {
-          key: 3,
-          name: '2023-11-23',
-          amount: 'N305',
-          status: 'success',
-        },
-        {
-          key: 4,
-          name: '2023-11-23',
-          amount: 'N305',
-          status: 'success',
-        },
-        {
-            key: 5,
-            name: '2023-11-23',
-            amount: 'N305',
-            status: 'success',
-        },
-        {
-            key: 6,
-            name: '2023-11-23',
-            amount: 'N305',
-            status: 'pending',
-        },
-        {
-            key: 7,
-            name: '2023-11-23',
-            amount: 'N305',
-            status: 'failed',
-        },
-        {
-            key: 8,
-            name: '2023-11-23',
-            amount: 'N305',
-            status: 'success',
-        },
-       ]);
+    //     {
+    //       key: 1,
+    //       time: '2023-11-23',
+    //       amount: 'N305',
+    //       status: 'success',
+    //     },
+    //     {
+    //       key: 2,
+    //       name: '2023-11-23',
+    //       amount: 'N305',
+    //       status: 'success',
+    //     },
+    //     {
+    //       key: 3,
+    //       name: '2023-11-23',
+    //       amount: 'N305',
+    //       status: 'success',
+    //     },
+    //     {
+    //       key: 4,
+    //       name: '2023-11-23',
+    //       amount: 'N305',
+    //       status: 'success',
+    //     },
+    //     {
+    //         key: 5,
+    //         name: '2023-11-23',
+    //         amount: 'N305',
+    //         status: 'success',
+    //     },
+    //     {
+    //         key: 6,
+    //         name: '2023-11-23',
+    //         amount: 'N305',
+    //         status: 'pending',
+    //     },
+    //     {
+    //         key: 7,
+    //         name: '2023-11-23',
+    //         amount: 'N305',
+    //         status: 'failed',
+    //     },
+    //     {
+    //         key: 8,
+    //         name: '2023-11-23',
+    //         amount: 'N305',
+    //         status: 'success',
+    //     },
+    // ]);
      
        const from = page * itemsPerPage;
-       const to = Math.min((page + 1) * itemsPerPage, items.length);
+       const to = Math.min((page + 1) * itemsPerPage, transactionsData.length);
+
+       const getTrans = async() => {
+        setLoading(true)
+        console.log('in transactions')
+        $result = await transactions()
+        // console.log($result)
+        setLoading(false)
+
+        if($result.status == 200){
+            setTransData($result)
+        }else if($result.status == 300){
+            entSignOut()
+            return [
+                alert("Token Expired") 
+            ]
+        }else{
+        }
+        console.log('hereeee')
+        console.log(transData)
+
+    }
      
-       React.useEffect(() => {
-         setPage(0);
+       useEffect(() => {
+        getTrans();
+        setPage(0);
+        console.l
        }, [itemsPerPage]);
 
 
@@ -116,41 +142,65 @@ const Home = ({ navigation }) => {
                                 </Card.Actions>
                             </Card>
                         </View>
-                        <View style={styles.datatable}>
-                            <DataTable>
-                            <DataTable.Header>
-                                <DataTable.Title >Id</DataTable.Title>
-                                <DataTable.Title >Date</DataTable.Title>
-                                <DataTable.Title numeric>amount</DataTable.Title>
-                                <DataTable.Title numeric>status</DataTable.Title>
-                            </DataTable.Header>
+                        { transactionsDataStatus ?
+                            <View style={styles.datatable}>
+                                <DataTable>
+                                    <View style={styles.searchBarCase}>
+                                        <Searchbar
+                                        mode="view"
+                                        placeholder="Search"
+                                        onChangeText={onChangeSearch}
+                                        value={searchQuery}
+                                        style={styles.searchBar}
+                                        />
+                                    </View>
+                                    
+                                <DataTable.Header>
+                                    {/* <DataTable.Title >Id</DataTable.Title> */}
+                                    <DataTable.Title >Date</DataTable.Title>
+                                    <DataTable.Title numeric>amount</DataTable.Title>
+                                    <DataTable.Title numeric>status</DataTable.Title>
+                                </DataTable.Header>
 
-                            {items.slice(from, to).map((item) => (
-                                <TouchableOpacity>
-                                    <DataTable.Row key={item.key}>
-                                        <DataTable.Cell >{item.key}</DataTable.Cell>
-                                        <DataTable.Cell >{item.name}</DataTable.Cell>
-                                        <DataTable.Cell numeric>{item.amount}</DataTable.Cell>
-                                        <DataTable.Cell numeric>{item.status}</DataTable.Cell>
-                                    </DataTable.Row>
-                                </TouchableOpacity>
-                                
-                            ))}
+                                {transactionsData.slice(from, to).map((item) => (
+                                    <TouchableOpacity onPress = {() => navigation.navigate('Transaction Details', {transReference: item.reference })}>
+                                        <DataTable.Row key={item.id}>
+                                            {/* <DataTable.Cell >{item.id}</DataTable.Cell> */}
+                                            <DataTable.Cell >{item.created_at}</DataTable.Cell>
+                                            <DataTable.Cell numeric>N{item.amount}</DataTable.Cell>
+                                            <DataTable.Cell numeric>
+                                                {item.status == 1 ?
+                                                    <Text style={styles.success}>Successful</Text>
+                                                    :item.status == 2 ?
+                                                    <Text style={styles.failed}>Failed</Text>
+                                                    :<Text style={styles.pending}>Pending</Text>
+                                                }
+                                                </DataTable.Cell>
+                                        </DataTable.Row>
+                                    </TouchableOpacity>
+                                    
+                                ))}
 
-                            <DataTable.Pagination
-                                page={page}
-                                numberOfPages={Math.ceil(items.length / itemsPerPage)}
-                                onPageChange={(page) => setPage(page)}
-                                label={`${from + 1}-${to} of ${items.length}`}
-                                numberOfItemsPerPageList={numberOfItemsPerPageList}
-                                numberOfItemsPerPage={itemsPerPage}
-                                onItemsPerPageChange={onItemsPerPageChange}
-                                showFastPaginationControls
-                                selectPageDropdownLabel={'Rows per page'}
-                                paginationControlRippleColor={'#209eda'}
-                            />
-                            </DataTable>
-                        </View>
+                                <DataTable.Pagination
+                                    page={page}
+                                    numberOfPages={Math.ceil(transactionsData.length / itemsPerPage)}
+                                    onPageChange={(page) => setPage(page)}
+                                    label={`${from + 1}-${to} of ${transactionsData.length}`}
+                                    numberOfItemsPerPageList={numberOfItemsPerPageList}
+                                    numberOfItemsPerPage={itemsPerPage}
+                                    onItemsPerPageChange={onItemsPerPageChange}
+                                    showFastPaginationControls
+                                    selectPageDropdownLabel={'Rows per page'}
+                                    paginationControlRippleColor={'#209eda'}
+                                />
+                                </DataTable>
+                            </View>
+                            :
+                
+                            <View style={styles.loadingIndicator}>
+                                <ActivityIndicator color="#209eda" />
+                            </View>
+                        }
                     </View>
                 </ScrollView>          
             </View>
@@ -176,6 +226,15 @@ const styles = StyleSheet.create({
         marginTop: 5,
         width:'90%',
         
+    },
+    loadingIndicator:{
+        marginTop: 30
+    },
+    success:{
+        color: 'green'
+    },
+    failed:{
+        color: 'red'
     },
     datatable:{
         marginTop: 30
@@ -208,6 +267,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 13
     },
+    searchBarCase:{
+        alignItems: 'center'
+    },
     theBorder:{
         backgroundColor: '#0c3258',
         marginTop: 60,
@@ -231,6 +293,11 @@ const styles = StyleSheet.create({
         color: 'rgb(71, 85, 105)',
         fontSize: 17,
         marginLeft: 15
+    },
+    searchBar:{
+        backgroundColor: '#ffffff',
+        width:'90%'
+
     },
     paymentPlan:{
         paddingTop: 15,

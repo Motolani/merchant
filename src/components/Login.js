@@ -15,6 +15,7 @@ const Login = ({ navigation }) => {
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [loginType, setLoginType] = useState(0);
     const [loading, setLoading] = useState(false);
     const [secureTextEntry, setSecureTextEntry] = useState(true);
 

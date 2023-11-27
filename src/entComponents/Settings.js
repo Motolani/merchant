@@ -8,17 +8,103 @@ import Feather from "react-native-vector-icons/Feather"
 import { SelectList } from 'react-native-dropdown-select-list';
 import LinearGradient from 'react-native-linear-gradient';
 import { AuthContext } from '../context/AuthContext';
-import { IconButton, MD3Colors, Divider, PaperProvider} from 'react-native-paper';
+import { IconButton, MD3Colors, Divider, PaperProvider, Switch} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Ionicons';
 import IconTwo from 'react-native-vector-icons/MaterialCommunityIcons';
+import Storage from '../../Helpers/Storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
 const Settings = ({ navigation }) => {
     const { msisdn, userToken, signOut } = useContext(AuthContext);
     const [ loading, setLoading ] = useState(false);
+    const [isSwitchOn, setIsSwitchOn] = useState(false);
+    const [autoLogin, setAutoLogin] = useState(false);
+    const [biometryType, setBiometryType] = useState(undefined);
+    
+
+    const onToggleSwitch = () => setIsSwitchOn(!isSwitchOn);
+    const [biometricLogin, setBiometricLogin] = useState(bioFix);
+  
+    var bioFix = false
+    useEffect(() => {
+        AsyncStorage.getItem("@loginBiometric").then((value) => {
+        
+        if(value !== null && value == 'true'){
+            bioFix = true
+            setBiometricLogin(true)
+        }
+        // alert(value); // you  will need use the alert in here because this is the point in the execution which you receive the value from getItem.
+        // you could do your authentication and routing logic here but I suggest that you place them in another function and just pass the function as seen in the example below.
+        });
+    })
+    const toggleSwitch = () => {
+        setBiometricLogin(!biometricLogin)
+
+        var rx = 'false'
+        // console.log('state value: '+biometricLogin)
+        if(!biometricLogin == true){
+        rx = 'true'
+        }
+
+        const storeData = async () => {
+        try {
+            await AsyncStorage.setItem(
+            '@loginBiometric',
+            rx,
+            );
+            // console.log('loginbio is set to '+ rx)
+        } catch (error) {
+            // Error saving data
+            // console.log(error)
+        }
+        };
+        storeData()
+    }
 
 
+    
+    const onchangeAutoLogin = (res) => {
+        if (biometricLogin === true && res === true) {
+          saveTouchIDLogin(false);
+        }
+    
+        saveAutoLogin(res);
+      };
+    
+    const saveTouchIDLogin = (res, biometryType = undefined) => {
+        // this.setState((state) => ({
+        //   biometricLogin: !state.biometricLogin,
+        //   biometryType,
+        // }));
+        setBiometricLogin(!biometricLogin)
+        Storage.storeObjectData('biometricLogin', res);
+      };
+    
+    const saveAutoLogin = (res) => {
+        setAutoLogin(!autoLogin),
+        Storage.storeObjectData('autoLogin', res);
+      };
+    
+    const loadAutoLogin = async () => {
+        let [autoLoginPromise, biometricLoginPromise] = await Promise.all([
+          Storage.getObjectData('autoLogin').then((res) => res),
+          Storage.getObjectData('biometricLogin').then((res) => res),
+        ]).then((results) => results);
+    
+        if (autoLoginPromise.data != null) {
+            setAutoLogin(autoLoginPromise.data)
+        }
+    
+        if (biometricLoginPromise.data != null) {
+            setBiometricLogin(biometricLoginPromise.data);
+        }
+      };
+
+      useEffect(() => {
+        loadAutoLogin()
+    }, []);
     return (
         <PaperProvider>
             <View style={styles.container}>
@@ -31,6 +117,16 @@ const Settings = ({ navigation }) => {
                                 </View>
                                 <Text style={styles.itemText}>Change Password</Text>
                                 <Icon name="chevron-forward"  size={20} color="#000000" style={styles.arrowIcon}/>
+                        </View>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={onToggleSwitch} style={styles.changePin}>
+                        <View style={styles.containTwo}>
+                            <View style={styles.theBorder}>
+                                <IconTwo name="fingerprint"  size={32} color="#10486c" style={styles.withPin}/>
+                            </View>
+                            <Text style={styles.itemText}>Toggle Finger Pin</Text>
+                            <Switch  color={'#209eda'} style={styles.arrowIcon} onValueChange={toggleSwitch} value={biometricLogin}/>
                         </View>
                     </TouchableOpacity>
 
@@ -143,6 +239,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         alignItems: 'center',
     },
+
     containTwo:{
         flexDirection: 'row',
         flexWrap: 'wrap',

@@ -19,7 +19,8 @@ import Payment from './src/components/Payment';
 import WalletHistory from './src/components/WalletHistory';
 import { AuthContext } from './src/context/AuthContext';
 import TransactionHistoryDetails from './src/components/TransactionHistoryDetails';
-import changePWD from './src/entComponents/PasswordChange'
+import TransDetails from './src/entComponents/TransactionDetails'
+import changePWD from './src/entComponents/PasswordChange';
 
 
 
@@ -94,9 +95,10 @@ const App = ({ navigation}) => {
                 }
                 {/* <Stack.Screen name="Back" component={EntDashboard} /> */}
                 <Stack.Screen options={{ headerShown: true, headerStyle: { backgroundColor: '#f2f2f2' }}} name="Change Password" component={changePWD} />
+                <Stack.Screen options={{ headerShown: true, headerStyle: { backgroundColor: '#f2f2f2' }}} name="Transaction Details" component={TransDetails} />
 
                 <Stack.Screen options={{ headerShown: true, headerStyle: { backgroundColor: '#f2f2f2' }}} name="Payment" component={Payment} />
-                <Stack.Screen options={{ headerShown: false }} name="TransactionDetails" component={TransactionHistoryDetails} />
+                {/* <Stack.Screen options={{ headerShown: false }} name="TransactionDetails" component={TransactionHistoryDetails} /> */}
             </Stack.Navigator>
         </NavigationContainer>
     )
