@@ -55,9 +55,9 @@ const Login = ({ navigation }) => {
                 {
                     // Touch ID is supported on Android
                     console.log('here android')
-                    if(isAuth){
-                        return null
-                    }
+                    // if(isAuth){
+                    //     return null
+                    // }
                     TouchID.authenticate('', optionalConfigObject)
                     .then(success => {
                         console.log('Success', success);
@@ -76,42 +76,107 @@ const Login = ({ navigation }) => {
         });
     }
 
+    const test = async() => {
+        console.log('here')
+        await AsyncStorage.getItem("merchantEmail").then(
+            (result)=> console.log(result)
+        )
+        await AsyncStorage.getItem("merchantPassword").then(
+            (resultTwo)=> console.log(resultTwo)
+        )
+    }
+
     const fingerPrintLogin = async() => {
         // const value = await AsyncStorage.getItem('@loginBiometric');
-        const passwordValue = await AsyncStorage.getItem('@merchantPassword');
-        const emailValue = await AsyncStorage.getItem('@merchantEmail');
 
-        console.log('passwordValue: '+passwordValue)
-        console.log('emailValue: '+emailValue)
+        await AsyncStorage.getItem("merchantEmail").then(
+            (result)=> {
+                setUsername(result)
+                $useer = result
+            }
+        )
+        await AsyncStorage.getItem("merchantPassword").then(
+            (resultTwo)=> {
+                setPassword(resultTwo)
+                $pwd = resultTwo
+            }
+        )
         
-        onSubmit();
+        console.log('pre submit')
+        console.log(username)
+        console.log(password)
+        
+        onSubmit($useer, $pwd);
 
     }
 
-    const onSubmit = async () => {
-        if(!username || !password){
-            return alert("Fill in all fields")
-        }
-        console.log('username - ' + username, 'password - ' + password);
+    const finger = async() => {
+        await AsyncStorage.getItem("TouchLogin").then(
+            (result)=> {
+                if(result == 'true'){
+                    setIsAuth(true)
+                    console.log('result')
+                    console.log(result)
 
+                }else{
+                    setIsAuth(false)
+                    console.log('result')
+                    console.log(result)
+
+                }
+            }
+        )
+        console.log(isAuth)
+    }
+
+    const onSubmit = async (useer=null, pwd=null) => {
         setLoading(true)
-        await entSignIn(username, password);
-        console.log(username, password);
+
+        if(useer != null && pwd != null){
+            await entSignIn(useer, pwd);
+        }else{
+
+            console.log(username)
+            console.log(password)
+            if(!username || !password){
+                return alert("Fill in all fields")
+            }
+            console.log('username - ' + username, 'password - ' + password);
 
 
-        if(error){
-            return [
-                alert(error),
-                setLoading(false)
-            ]    
+            await entSignIn(username, password);
+
+            // await AsyncStorage.getItem("merchantEmail").then(
+            //     (result)=> setUsername(result)
+            // )
+
+            await AsyncStorage.setItem("merchantEmail", username).then(
+                () => AsyncStorage.getItem("merchantEmail")
+                    .then((result)=>console.log(result))
+            )
+
+            await AsyncStorage.setItem("merchantPassword", password).then(
+                () => AsyncStorage.getItem("merchantPassword")
+                    .then((result)=>console.log(result))
+            )
+
+            console.log(username, password);
+
+
+            if(error){
+                return [
+                    alert(error),
+                    setLoading(false)
+                ]    
+            }
         }
-        
         setLoading(false)
     }
 
-    // useEffect(() => {
-    //     handleBiometric()
-    // }, [])
+    useEffect(() => {
+        // handleBiometric()
+        finger()
+    }, [])
 
 
     const updateSecureTextEntry = () => {
@@ -195,8 +260,8 @@ const Login = ({ navigation }) => {
                             </View>
 
                             <View  style={styles.fingerPrintgin}>
-                                {yesFinger &&
-                                    <TouchableOpacity onPress={() => initiateFinger()}>
+                                {isAuth &&
+                                    <TouchableOpacity onPress={() => handleBiometric()}>
                                         <IconTwo name="fingerprint"  size={32} color="#10486c" style={styles.withPin}/>
                                     </TouchableOpacity> 
                                 }

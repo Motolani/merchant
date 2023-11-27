@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { StyleSheet, Text, View, TouchableOpacity, Platform, Dimensions, TextInput, ScrollView, Alert, ActivityIndicator } from 'react-native'
 import React, { useState, useEffect, useContext } from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Awesome from 'react-native-vector-icons/FontAwesome';
 import * as Animatable from 'react-native-animatable';
 import Ionic from 'react-native-vector-icons/Ionicons';
@@ -8,7 +9,7 @@ import Feather from "react-native-vector-icons/Feather"
 import { SelectList } from 'react-native-dropdown-select-list';
 import LinearGradient from 'react-native-linear-gradient';
 import { AuthContext } from '../context/AuthContext';
-import { IconButton, MD3Colors, Searchbar, Card, Button, DataTable, PaperProvider} from 'react-native-paper';
+import { IconButton, DefaultTheme, Searchbar, Card, Button, DataTable, PaperProvider} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Ionicons';
 import IconTwo from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -25,7 +26,6 @@ const Home = ({ navigation }) => {
     const [itemsPerPage, onItemsPerPageChange] = useState(
         numberOfItemsPerPageList[0]
     );
-    //     {
     //       key: 1,
     //       time: '2023-11-23',
     //       amount: 'N305',
@@ -74,7 +74,6 @@ const Home = ({ navigation }) => {
     //         status: 'success',
     //     },
     // ]);
-     
        const from = page * itemsPerPage;
        const to = Math.min((page + 1) * itemsPerPage, transactionsData.length);
 
@@ -102,7 +101,8 @@ const Home = ({ navigation }) => {
        useEffect(() => {
         getTrans();
         setPage(0);
-        console.l
+        console.log('Email')
+        console.log(AsyncStorage.getItem('@merchantEmail'))
        }, [itemsPerPage]);
 
 
@@ -143,63 +143,62 @@ const Home = ({ navigation }) => {
                             </Card>
                         </View>
                         { transactionsDataStatus ?
-                            <View style={styles.datatable}>
-                                <DataTable>
-                                    <View style={styles.searchBarCase}>
-                                        <Searchbar
-                                        mode="view"
-                                        placeholder="Search"
-                                        onChangeText={onChangeSearch}
-                                        value={searchQuery}
-                                        style={styles.searchBar}
-                                        />
-                                    </View>
-                                    
-                                <DataTable.Header>
-                                    {/* <DataTable.Title >Id</DataTable.Title> */}
-                                    <DataTable.Title >Date</DataTable.Title>
-                                    <DataTable.Title numeric>amount</DataTable.Title>
-                                    <DataTable.Title numeric>status</DataTable.Title>
-                                </DataTable.Header>
+                                <View style={styles.datatable}>
+                                    <DataTable>
+                                        <View style={styles.searchBarCase}>
+                                            <Searchbar
+                                            mode="view"
+                                            placeholder="Search"
+                                            onChangeText={onChangeSearch}
+                                            value={searchQuery}
+                                            style={styles.searchBar}
+                                            />
+                                        </View>
+                                        
+                                    <DataTable.Header>
+                                        {/* <DataTable.Title >Id</DataTable.Title> */}
+                                        <DataTable.Title >Date</DataTable.Title>
+                                        <DataTable.Title numeric>amount</DataTable.Title>
+                                        <DataTable.Title numeric>status</DataTable.Title>
+                                    </DataTable.Header>
 
-                                {transactionsData.slice(from, to).map((item) => (
-                                    <TouchableOpacity onPress = {() => navigation.navigate('Transaction Details', {transReference: item.reference })}>
-                                        <DataTable.Row key={item.id}>
-                                            {/* <DataTable.Cell >{item.id}</DataTable.Cell> */}
-                                            <DataTable.Cell >{item.created_at}</DataTable.Cell>
-                                            <DataTable.Cell numeric>N{item.amount}</DataTable.Cell>
-                                            <DataTable.Cell numeric>
-                                                {item.status == 1 ?
-                                                    <Text style={styles.success}>Successful</Text>
-                                                    :item.status == 2 ?
-                                                    <Text style={styles.failed}>Failed</Text>
-                                                    :<Text style={styles.pending}>Pending</Text>
-                                                }
-                                                </DataTable.Cell>
-                                        </DataTable.Row>
-                                    </TouchableOpacity>
-                                    
-                                ))}
+                                    {transactionsData.slice(from, to).map((item) => (
+                                        <TouchableOpacity onPress = {() => navigation.navigate('Transaction Details', {transReference: item.reference })}>
+                                            <DataTable.Row key={item.id}>
+                                                {/* <DataTable.Cell >{item.id}</DataTable.Cell> */}
+                                                <DataTable.Cell >{item.created_at}</DataTable.Cell>
+                                                <DataTable.Cell numeric>N{item.amount}</DataTable.Cell>
+                                                <DataTable.Cell numeric>
+                                                    {item.status == 1 ?
+                                                        <Text style={styles.success}>Successful</Text>
+                                                        :item.status == 2 ?
+                                                        <Text style={styles.failed}>Failed</Text>
+                                                        :<Text style={styles.pending}>Pending</Text>
+                                                    }
+                                                    </DataTable.Cell>
+                                            </DataTable.Row>
+                                        </TouchableOpacity>
+                                        
+                                    ))}
 
-                                <DataTable.Pagination
-                                    page={page}
-                                    numberOfPages={Math.ceil(transactionsData.length / itemsPerPage)}
-                                    onPageChange={(page) => setPage(page)}
-                                    label={`${from + 1}-${to} of ${transactionsData.length}`}
-                                    numberOfItemsPerPageList={numberOfItemsPerPageList}
-                                    numberOfItemsPerPage={itemsPerPage}
-                                    onItemsPerPageChange={onItemsPerPageChange}
-                                    showFastPaginationControls
-                                    selectPageDropdownLabel={'Rows per page'}
-                                    paginationControlRippleColor={'#209eda'}
-                                />
-                                </DataTable>
-                            </View>
+                                    <DataTable.Pagination
+                                        page={page}
+                                        numberOfPages={Math.ceil(transactionsData.length / itemsPerPage)}
+                                        onPageChange={(page) => setPage(page)}
+                                        label={`${from + 1}-${to} of ${transactionsData.length}`}
+                                        numberOfItemsPerPageList={numberOfItemsPerPageList}
+                                        numberOfItemsPerPage={itemsPerPage}
+                                        onItemsPerPageChange={onItemsPerPageChange}
+                                        showFastPaginationControls
+                                        selectPageDropdownLabel={'Rows per page'}
+                                        paginationControlRippleColor={'#209eda'}
+                                    />
+                                    </DataTable>
+                                </View>
                             :
-                
-                            <View style={styles.loadingIndicator}>
-                                <ActivityIndicator color="#209eda" />
-                            </View>
+                                <View style={styles.loadingIndicator}>
+                                    <ActivityIndicator color="#209eda" />
+                                </View>
                         }
                     </View>
                 </ScrollView>          

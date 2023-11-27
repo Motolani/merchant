@@ -21,89 +21,64 @@ const Settings = ({ navigation }) => {
     const [ loading, setLoading ] = useState(false);
     const [isSwitchOn, setIsSwitchOn] = useState(false);
     const [autoLogin, setAutoLogin] = useState(false);
-    const [biometryType, setBiometryType] = useState(undefined);
+    // const [biometryType, setBiometryType] = useState(undefined);
     
 
     const onToggleSwitch = () => setIsSwitchOn(!isSwitchOn);
-    const [biometricLogin, setBiometricLogin] = useState(bioFix);
-  
-    var bioFix = false
-    useEffect(() => {
-        AsyncStorage.getItem("@loginBiometric").then((value) => {
-        
-        if(value !== null && value == 'true'){
-            bioFix = true
-            setBiometricLogin(true)
-        }
-        // alert(value); // you  will need use the alert in here because this is the point in the execution which you receive the value from getItem.
-        // you could do your authentication and routing logic here but I suggest that you place them in another function and just pass the function as seen in the example below.
-        });
-    })
+    const [biometricLogin, setBiometricLogin] = useState(false);
+ 
     const toggleSwitch = () => {
-        setBiometricLogin(!biometricLogin)
 
-        var rx = 'false'
-        // console.log('state value: '+biometricLogin)
-        if(!biometricLogin == true){
-        rx = 'true'
-        }
+        if(biometricLogin == false){
 
-        const storeData = async () => {
-        try {
-            await AsyncStorage.setItem(
-            '@loginBiometric',
-            rx,
-            );
-            // console.log('loginbio is set to '+ rx)
-        } catch (error) {
-            // Error saving data
-            // console.log(error)
+            const storeData = async () => {
+                try {
+                    await AsyncStorage.setItem("TouchLogin", JSON.stringify(true)).then(
+                        () => AsyncStorage.getItem("TouchLogin")
+                            .then((result)=>console.log(result))
+                    )
+                } catch (error) {
+                    // Error saving data
+                    console.log(error)
+                }
+            };
+            storeData()
+            setBiometricLogin(true)
+
+        }else{
+
+            const unstoreData = async () => {
+                try {
+                    await AsyncStorage.setItem("TouchLogin", JSON.stringify(false)).then(
+                        () => AsyncStorage.getItem("TouchLogin")
+                            .then((result)=>console.log(result))
+                    )
+                } catch (error) {
+                    // Error saving data
+                    console.log(error)
+                }
+            };
+            unstoreData()
+            setBiometricLogin(false)
+
         }
-        };
-        storeData()
     }
 
+    const finger = async() => {
+        await AsyncStorage.getItem("TouchLogin").then(
+            (result)=> {
+                if(result == 'true'){
+                    setBiometricLogin(true)
+                }else{
+                    setBiometricLogin(false)
+                }
+            })
+        console.log(biometricLogin)
+    }
 
-    
-    const onchangeAutoLogin = (res) => {
-        if (biometricLogin === true && res === true) {
-          saveTouchIDLogin(false);
-        }
-    
-        saveAutoLogin(res);
-      };
-    
-    const saveTouchIDLogin = (res, biometryType = undefined) => {
-        // this.setState((state) => ({
-        //   biometricLogin: !state.biometricLogin,
-        //   biometryType,
-        // }));
-        setBiometricLogin(!biometricLogin)
-        Storage.storeObjectData('biometricLogin', res);
-      };
-    
-    const saveAutoLogin = (res) => {
-        setAutoLogin(!autoLogin),
-        Storage.storeObjectData('autoLogin', res);
-      };
-    
-    const loadAutoLogin = async () => {
-        let [autoLoginPromise, biometricLoginPromise] = await Promise.all([
-          Storage.getObjectData('autoLogin').then((res) => res),
-          Storage.getObjectData('biometricLogin').then((res) => res),
-        ]).then((results) => results);
-    
-        if (autoLoginPromise.data != null) {
-            setAutoLogin(autoLoginPromise.data)
-        }
-    
-        if (biometricLoginPromise.data != null) {
-            setBiometricLogin(biometricLoginPromise.data);
-        }
-      };
-
-      useEffect(() => {
-        loadAutoLogin()
+    useEffect(() => {
+        finger()
+        // loadAutoLogin()
     }, []);
     return (
         <PaperProvider>

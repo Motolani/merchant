@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import React, { createContext, useState } from 'react';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const AuthContext = createContext();
@@ -44,16 +45,19 @@ const AuthProvider = ({children}) => {
                 console.log(response.data.rec);
                 setName(response.data.mercht);
 
+
                 const storeData = async () => {
                     try {
+                        const pwd = JSON.stringify(password)
                       await AsyncStorage.setItem(
-                        '@merchantPassword',
-                        password,
+                        'merchantPassword',
+                        pwd,
                       );
           
+                      const userN = JSON.stringify(username)
                       await AsyncStorage.setItem(
-                        '@merchantEmail',
-                        username,
+                        'merchantEmail',
+                        userN,
                       );
           
                       console.log('passwordValue set: '+password)
@@ -61,8 +65,8 @@ const AuthProvider = ({children}) => {
                       // Error saving data
                       console.log('passwordValue not set ')
                     }
-                  };
-                  storeData();
+                };
+                storeData();
 
             }else if(data.status == 500){
                 return [
@@ -84,10 +88,12 @@ const AuthProvider = ({children}) => {
     const entSignIn = async (username, password) => {
         const authUser = { username, password }
         setIsLoading(true)
+        console.log('dataa');
 
         try {
             console.log('in here');
             const {data} = await axios.post("https://test.pinspay.com/api/merchant/login", authUser)
+            console.log('data');
             console.log(data);
             if(data.status == 200){
                 let response = data;
@@ -103,6 +109,7 @@ const AuthProvider = ({children}) => {
                 console.log(response.data.firstName+" "+response.data.lastName);
                 setName(response.data.firstName+" "+response.data.lastName);
                 setUserName(response.data.username);
+
             }else if(data.status == 500){
                 return [
                     // setError(data.message),
