@@ -8,6 +8,18 @@ class Network {
   getPropValue = (object, path = "") =>
     path.split(".").reduce((o, x) => (o == undefined ? o : o[x]), object);
 
+  setWallet = (payload) => {
+    try {
+      let info = this.getPropValue(payload, "wallet_information");
+      if (info) {
+        store.dispatch({
+          type: "FETCH_BALANCE",
+          payload: JSON.parse(info),
+        });
+      }
+    } catch (error) {}
+  };
+
   checkAuth = (payload) => {
     let authError = this.getPropValue(payload, "authError");
     let errorMessage =
@@ -49,7 +61,8 @@ class Network {
       let responseHeaders = responseObject.headers;
 
       this.checkAuth(response);
-      
+      this.setWallet(responseHeaders);
+
       result = { response, error: false, errorMessage: null };
     } catch (error) {
       result = { response: null, error: true, errorMessage: error.toString() };
@@ -80,7 +93,8 @@ class Network {
       let responseHeaders = responseObject.headers;
 
       this.checkAuth(response);
-     
+      this.setWallet(responseHeaders);
+
       result = { response, error: false, errorMessage: null };
     } catch (error) {
       result = { response: null, error: true, errorMessage: error.toString() };

@@ -49,6 +49,9 @@ const Dashboard = ({ navigation }) => {
                             iconName = 'bank';
                             size = size - 1;
                             // color = 'white';
+                        }else if(route.name === 'Settings'){
+                            iconName = 'cog-sharp';
+                            size = size - 1;
                         }
 
                         return <FontAwesome name={iconName} size={size} color={color} />
@@ -80,8 +83,9 @@ const Dashboard = ({ navigation }) => {
                         paddingBottom: 5,
                         // paddingTop: 2,
                         fontSize: 12,
-                        fontWeight: '600'
+                        fontWeight: '600',
                     },
+                    headerStyle: { backgroundColor: '#f2f2f2' },
                     tabBarIcon: ({focused, color, size}) => (
                         <Icon name="receipt-sharp" size={32} color="#209eda" />
                       )

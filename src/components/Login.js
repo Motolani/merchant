@@ -1,11 +1,15 @@
 /* eslint-disable prettier/prettier */
 import { View, Text, StyleSheet, StatusBar, TouchableOpacity, Dimensions, Platform, TextInput, Image, Button, Alert, SafeAreaView, ScrollView, ActivityIndicator } from 'react-native'
-import React, { useState, useContext } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import * as Animatable from 'react-native-animatable';
 import LinearGradient from 'react-native-linear-gradient';
 import Awesome from 'react-native-vector-icons/FontAwesome'
 import Feather from 'react-native-vector-icons/Feather'
 import { AuthContext } from '../context/AuthContext';
+import {PaperProvider} from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import TouchID from 'react-native-touch-id';
+import IconTwo from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
@@ -15,34 +19,150 @@ const Login = ({ navigation }) => {
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [loginType, setLoginType] = useState(0);
+    // const [loginType, setLoginType] = useState(0);
     const [loading, setLoading] = useState(false);
     const [secureTextEntry, setSecureTextEntry] = useState(true);
+    const [isAuth, setIsAuth] = useState(false)
 
-    const { signIn, error } = useContext(AuthContext);
+    const { signIn, error, setLoginType } = useContext(AuthContext);
 
-    const onSubmit = async () => {
-        if(!username || !password){
-            return alert("Fill in all fields")
-        }
-        console.log('username - ' + username, 'password - ' + password);
+    const optionalConfigObject = {
+        title: 'Authentication Required', // Android
+        imageColor: '#e00606', // Android
+        imageErrorColor: '#ff0000', // Android
+        sensorDescription: 'Touch sensor', // Android
+        sensorErrorDescription: 'Failed', // Android
+        cancelText: 'Cancel', // Android
+        fallbackLabel: 'Show Passcode', // iOS (if empty, then label is hidden)
+        unifiedErrors: false, // use unified error messages (default false)
+        passcodeFallback: false, // iOS - allows the device to fall back to using the passcode, if faceid/touch is not available. this does not mean that if touchid/faceid fails the first few times it will revert to passcode, rather that if the former are not enrolled, then it will use the passcode.
+    };
+
+    const handleBiometric = () => {
+        console.log(TouchID.isSupported(optionalConfigObject))
+        TouchID.isSupported(optionalConfigObject)
+            .then(biometryType => {
+                if (biometryType === 'TouchID') {
+                    // Touch ID is supported on iOS
+                console.log('here IOS')
+                }else
+                {
+                    // Touch ID is supported on Android
+                    console.log('here android')
+                    // if(isAuth){
+                    //     return null
+                    // }
+                    TouchID.authenticate('', optionalConfigObject)
+                    .then(success => {
+                        console.log('Success', success);
+                        setIsAuth(success)
+                        fingerPrintLogin()
+
+                    })
+                    .catch(err => {
+                        BackHandler.exitApp();
+                    })
+                }
+            })
+        .catch(error => {
+            // User's device does not support Touch ID (or Face ID)
+            // This case is also triggered if users have not enabled Touch ID on their device
+        });
+    }
+
+    const fingerPrintLogin = async() => {
+        // const value = await AsyncStorage.getItem('@loginBiometric');
+
+        await AsyncStorage.getItem("merchantEmail").then(
+            (result)=> {
+                setUsername(result)
+                $useer = result
+            }
+        )
+        await AsyncStorage.getItem("merchantPassword").then(
+            (resultTwo)=> {
+                setPassword(resultTwo)
+                $pwd = resultTwo
+            }
+        )
+        
+        console.log('pre submit')
+        console.log(username)
+        console.log(password)
+        
+        onSubmit($useer, $pwd);
+
+    }
+
+    const finger = async() => {
+        await AsyncStorage.getItem("TouchLogin").then(
+            (result)=> {
+                if(result == 'true'){
+                    setIsAuth(true)
+                    console.log('result')
+                    console.log(result)
+
+                }else{
+                    setIsAuth(false)
+                    console.log('result')
+                    console.log(result)
+
+                }
+            }
+        )
+        console.log(isAuth)
+    }
+
+    const onSubmit = async (useer=null, pwd=null) => {
         setLoading(true)
-        await signIn(username, password);
-        console.log(username, password);
-        if(error){
-            return [
-                alert(error),
-                setLoading(false)
-            ]    
+
+        if(useer != null && pwd != null){
+            await signIn(useer, pwd);
+        }else{
+
+            console.log(username)
+            console.log(password)
+            if(!username || !password){
+                return alert("Fill in all fields")
+            }
+            console.log('username - ' + username, 'password - ' + password);
+            
+            await signIn(username, password);
+
+            await AsyncStorage.setItem("merchantEmail", username).then(
+                () => AsyncStorage.getItem("merchantEmail")
+                    .then((result)=>console.log(result))
+            )
+
+            await AsyncStorage.setItem("merchantPassword", password).then(
+                () => AsyncStorage.getItem("merchantPassword")
+                    .then((result)=>console.log(result))
+            )
+
+            console.log(username, password);
+            if(error){
+                return [
+                    alert(error),
+                    setLoading(false)
+                ]    
+            }
         }
         setLoading(false)
     }
 
+    useEffect(() => {
+        // handleBiometric()
+        finger()
+    }, [])
 
     const updateSecureTextEntry = () => {
         setSecureTextEntry(!secureTextEntry);
     }
 
+    const switchLogin = () => {
+        setLoginType('Ent')
+        navigation.navigate('EntLogin')
+    }
 
     return (
         <SafeAreaView style={styles.mainContainer}>
@@ -115,11 +235,19 @@ const Login = ({ navigation }) => {
                         </View>
                     </View>
 
+                    <View  style={styles.fingerPrintgin}>
+                        {isAuth &&
+                            <TouchableOpacity onPress={() => handleBiometric()}>
+                                <IconTwo name="fingerprint"  size={32} color="#10486c" style={styles.withPin}/>
+                            </TouchableOpacity> 
+                        }
+                    </View>
+
                     <TouchableOpacity
-                        onPress={() => navigation.navigate('EntLogin')}
+                        onPress={switchLogin}
                         style={styles.entMerchant}
                     >
-                        <Text style={styles.entMerchantText}>Switch to Enterprice Merchant Login</Text>
+                        <Text style={styles.entMerchantText}>Switch to Enterprise Merchant Login</Text>
                     </TouchableOpacity>
                     
                     <TouchableOpacity
@@ -235,7 +363,13 @@ const styles = StyleSheet.create({
     entMerchant: {
         marginTop:30,
         marginButton:15
-    }
+    },
+    fingerPrintgin: {
+        width: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        // marginBottom: 24,
+    },
 
 });
 

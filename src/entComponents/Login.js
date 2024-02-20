@@ -27,9 +27,9 @@ const Login = ({ navigation }) => {
     const [biometryType, setBiometryType] = useState('');
     const [is_submit, setIs_submit] = useState(false);
     const [yesFinger, setYesFinger] = useState(false)
-    const [isAuth, setIsAuth] = useState(false)
+    const [isAuthEnt, setIsAuthEnt] = useState(false)
 
-    const { entSignIn, error } = useContext(AuthContext);
+    const { entSignIn, error, setLoginType } = useContext(AuthContext);
 
     const optionalConfigObject = {
         title: 'Authentication Required', // Android
@@ -55,13 +55,13 @@ const Login = ({ navigation }) => {
                 {
                     // Touch ID is supported on Android
                     console.log('here android')
-                    // if(isAuth){
+                    // if(isAuthEnt){
                     //     return null
                     // }
                     TouchID.authenticate('', optionalConfigObject)
                     .then(success => {
                         console.log('Success', success);
-                        setIsAuth(success)
+                        setIsAuthEnt(success)
                         fingerPrintLogin()
 
                     })
@@ -78,10 +78,10 @@ const Login = ({ navigation }) => {
 
     const test = async() => {
         console.log('here')
-        await AsyncStorage.getItem("merchantEmail").then(
+        await AsyncStorage.getItem("merchantEmailEnt").then(
             (result)=> console.log(result)
         )
-        await AsyncStorage.getItem("merchantPassword").then(
+        await AsyncStorage.getItem("merchantPasswordEnt").then(
             (resultTwo)=> console.log(resultTwo)
         )
     }
@@ -89,13 +89,13 @@ const Login = ({ navigation }) => {
     const fingerPrintLogin = async() => {
         // const value = await AsyncStorage.getItem('@loginBiometric');
 
-        await AsyncStorage.getItem("merchantEmail").then(
+        await AsyncStorage.getItem("merchantEmailEnt").then(
             (result)=> {
                 setUsername(result)
                 $useer = result
             }
         )
-        await AsyncStorage.getItem("merchantPassword").then(
+        await AsyncStorage.getItem("merchantPasswordEnt").then(
             (resultTwo)=> {
                 setPassword(resultTwo)
                 $pwd = resultTwo
@@ -111,22 +111,22 @@ const Login = ({ navigation }) => {
     }
 
     const finger = async() => {
-        await AsyncStorage.getItem("TouchLogin").then(
+        await AsyncStorage.getItem("TouchLoginEnt").then(
             (result)=> {
                 if(result == 'true'){
-                    setIsAuth(true)
+                    setIsAuthEnt(true)
                     console.log('result')
                     console.log(result)
 
                 }else{
-                    setIsAuth(false)
+                    setIsAuthEnt(false)
                     console.log('result')
                     console.log(result)
 
                 }
             }
         )
-        console.log(isAuth)
+        console.log(isAuthEnt)
     }
 
     const onSubmit = async (useer=null, pwd=null) => {
@@ -146,17 +146,13 @@ const Login = ({ navigation }) => {
 
             await entSignIn(username, password);
 
-            // await AsyncStorage.getItem("merchantEmail").then(
-            //     (result)=> setUsername(result)
-            // )
-
-            await AsyncStorage.setItem("merchantEmail", username).then(
-                () => AsyncStorage.getItem("merchantEmail")
+            await AsyncStorage.setItem("merchantEmailEnt", username).then(
+                () => AsyncStorage.getItem("merchantEmailEnt")
                     .then((result)=>console.log(result))
             )
 
-            await AsyncStorage.setItem("merchantPassword", password).then(
-                () => AsyncStorage.getItem("merchantPassword")
+            await AsyncStorage.setItem("merchantPasswordEnt", password).then(
+                () => AsyncStorage.getItem("merchantPasswordEnt")
                     .then((result)=>console.log(result))
             )
 
@@ -183,7 +179,10 @@ const Login = ({ navigation }) => {
         setSecureTextEntry(!secureTextEntry);
     }
 
-
+    const switchLogin = () => {
+        setLoginType('User')
+        navigation.navigate('Login')
+    }
 
     return (
         <PaperProvider>
@@ -260,7 +259,7 @@ const Login = ({ navigation }) => {
                             </View>
 
                             <View  style={styles.fingerPrintgin}>
-                                {isAuth &&
+                                {isAuthEnt &&
                                     <TouchableOpacity onPress={() => handleBiometric()}>
                                         <IconTwo name="fingerprint"  size={32} color="#10486c" style={styles.withPin}/>
                                     </TouchableOpacity> 
@@ -268,7 +267,7 @@ const Login = ({ navigation }) => {
                             </View>
 
                             <TouchableOpacity
-                                onPress={() => navigation.navigate('Login')}
+                                onPress={switchLogin}
                                 style={styles.entMerchant}
                             >
                                 <Text style={styles.entMerchantText}>Switch to Merchant Login</Text>

@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { View, Text, StyleSheet, StatusBar, TouchableOpacity, Dimensions, Image } from 'react-native'
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState, } from 'react'
 
 import * as Animatable from 'react-native-animatable';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -26,18 +26,14 @@ import changePWD from './src/entComponents/PasswordChange';
 
 const App = ({ navigation}) => {
 
-    const { userToken, userEntToken, merchantType }  = useContext(AuthContext);
+    const { userToken, userEntToken, merchantType, loginType }  = useContext(AuthContext);
     const Stack = createNativeStackNavigator();
     const Tab = createBottomTabNavigator(); 
-    
-    // useEffect(() => {
-    //     console.log('hello');
-    //     console.log('userToken');
-    //     console.log(userToken);
-    //     console.log('byeee');
-    // }, []);
+    const colorScheme = 'light'; // Hardcoded to light mode
 
+    
     const BottomTabScreen = () => {
+
 		return (
 			<Tab.Navigator
 				screenOptions={({ route }) => ({
@@ -45,6 +41,7 @@ const App = ({ navigation}) => {
 					tabBarStyle: {
 						height: 70
 					},
+                    
 
 					tabBarIcon: ({ focused, size, color }) => {
 						let iconName;
@@ -73,34 +70,54 @@ const App = ({ navigation}) => {
 	}
 
     return (
-        <NavigationContainer>
+        <>
+        {
+            loginType == 'User' ?
+            <NavigationContainer>
             <StatusBar animated={true} backgroundColor="rgb(96, 165, 250)"/>
             <Stack.Navigator 
                 screenOptions={{
                     headerShown: false,
                 }}>
-                {/* <Stack.Screen name="EntLogin" component={EntLogin} /> */}
                 
-                {/* {
+                {
                     userToken ?
                     <Stack.Screen name="Dashboard" component={Dashboard} />
                     :
                     <Stack.Screen name="Login" component={Login} />
-                } */}
-                {
-                    userEntToken ?
-                    <Stack.Screen name="Back" component={EntDashboard} />
-                    :
-                    <Stack.Screen name="EntLogin" component={EntLogin} />
                 }
-                {/* <Stack.Screen name="Back" component={EntDashboard} /> */}
-                <Stack.Screen options={{ headerShown: true, headerStyle: { backgroundColor: '#f2f2f2' }}} name="Change Password" component={changePWD} />
-                <Stack.Screen options={{ headerShown: true, headerStyle: { backgroundColor: '#f2f2f2' }}} name="Transaction Details" component={TransDetails} />
+
 
                 <Stack.Screen options={{ headerShown: true, headerStyle: { backgroundColor: '#f2f2f2' }}} name="Payment" component={Payment} />
-                {/* <Stack.Screen options={{ headerShown: false }} name="TransactionDetails" component={TransactionHistoryDetails} /> */}
+                <Stack.Screen options={{ headerShown: false }} name="TransactionDetails" component={TransactionHistoryDetails} />
+
+
             </Stack.Navigator>
-        </NavigationContainer>
+            
+            </NavigationContainer>
+            :
+            <NavigationContainer>
+                <StatusBar animated={true} backgroundColor="rgb(96, 165, 250)"/>
+                <Stack.Navigator 
+                    screenOptions={{
+                        headerShown: false,
+                    }}>
+
+                    {
+                        userEntToken ?
+                        <Stack.Screen name="Back" component={EntDashboard} />
+                        :
+                        <Stack.Screen name="EntLogin" component={EntLogin} />
+                    }
+                    <Stack.Screen options={{ headerShown: true, headerStyle: { backgroundColor: '#f2f2f2' }}} name="Change Password" component={changePWD} />
+                    <Stack.Screen options={{ headerShown: true, headerStyle: { backgroundColor: '#f2f2f2' }}} name="Transaction Details" component={TransDetails} />
+
+                </Stack.Navigator>
+            
+            </NavigationContainer>
+        }
+        </>
+        
     )
 }
 

@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
-import { StyleSheet, Text, View, TouchableOpacity, Platform, Dimensions, TextInput, ScrollView, Alert, ActivityIndicator } from 'react-native'
+import { StyleSheet, View, TouchableOpacity, Platform, Dimensions, ScrollView, Alert, ActivityIndicator } from 'react-native'
 import React, { useState, useEffect, useContext } from 'react'
+import { IconButton, Text, Portal, TextInput, Switch, Button, HelperText, PaperProvider} from 'react-native-paper';
 import Awesome from 'react-native-vector-icons/FontAwesome';
 import * as Animatable from 'react-native-animatable';
 import Ionic from 'react-native-vector-icons/Ionicons';
@@ -16,10 +17,92 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 const Payment = ({ navigation }) => {
     const { msisdn, userToken, signOut } = useContext(AuthContext);
     const [ loading, setLoading ] = useState(false);
+    const [secureTextEntry, setSecureTextEntry] = useState(true);
+    const [validateMsisdn, setValidateMsisdn] = useState('');
+    const [senderName, setSenderName] = useState('');
 
     const [amount, setAmount] =useState('');
     const [pin, setPin] =useState('');
     const [phone, setPhone] =useState('');
+
+    const validatePhone = async() => {
+
+        setValidateMsisdn('validating')
+        //call validate api
+        //put in here when you get end point
+        // const authUser = { sender }
+        setLoading(true)
+
+        //set the validated name state to the name to display
+        let sendPhone = {mobilePhone: phone}
+        console.log('sendPhone')
+        console.log(sendPhone)
+        try {
+            const header = { 
+                'logintoken': userToken,
+                Accept: 'application/json',
+                'Content-Type': 'multipart/form-data'
+            }
+            const {data} = await axios.post("https://test.pinspay.com/api/merchant-user/validatephone", sendPhone, { headers: header})
+            console.log(data);
+            if(data.status == 200){
+                let response = data;
+                console.log(response);
+                console.log("response.status ", response.status)
+                setSenderName(response.data.firstName +' '+response.data.lastName);
+                setValidateMsisdn('validated')
+
+
+            }else if(data.status == 500){
+                return [
+                    alert("Something went wrong"),
+                    setValidateMsisdn(''),
+                    setPhone(''),
+                ]
+            }else if(data.status == 302){
+                signOut()
+                let response = data;
+                console.log(response);
+                console.log("response.status ", response.status)
+                return [
+                    alert(response.data.firstName +' '+response.data.lastName+' Please complete Your registration to continue'), 
+                    setValidateMsisdn(''),
+                    setPhone('')
+                ]
+            }else if(data.status == 300){
+                
+                // validateMsisdn('')
+                return [
+                    alert(data.message),
+                    setValidateMsisdn(''),
+                    setPhone('')
+                ]
+            }else{
+                return [
+                    alert(data.message),
+                    setValidateMsisdn(''),
+                    setPhone('')
+                ]
+            }
+        } catch (error) {
+            console.log('validating error', error)
+            alert("Something went wrong")
+            setValidateMsisdn('')
+            setPhone('')
+        }
+        setLoading(false)
+        //validate api is done
+
+
+    }
+
+    useEffect(() => {
+        if(phone.length >= 11){
+             validatePhone()
+        }else{
+         setSenderName('')
+        }
+    }, [phone])
 
     const onProceed = async() => {
         if(!amount || !pin || !phone){
@@ -71,52 +154,170 @@ const Payment = ({ navigation }) => {
 
     }
 
+    const updateSecureTextEntry = () => {
+        setSecureTextEntry(!secureTextEntry);
+    }
 
     return (
         <View style={styles.container}>
             <ScrollView>
                 <View style={styles.bottomContainer}>
 
-                    <Text style={styles.Label}>Amount:</Text>
-                    <View style={styles.action}>
-                        <TextInput 
-                            placeholder="Input  Amount"
-                            style={styles.textInput}
-                            value={amount}
-                            onChangeText={setAmount}
-                            keyboardType='numeric'
-                            placeholderTextColor={'grey'}
+                    <View>
+                        <TextInput
+                        label="Amount"
+                        value={amount}
+                        underlineColor={'#209eda'}
+                        activeUnderlineColor={'#475980'}
+                        activeOutlineColor={'#5cdb93'}
+                        outlineColor={'#ffffff'}
+                        backgroundColor={'#ffffff'}
+                        keyboardType='numeric'
+                        style={styles.inputAmount}
+                        onChangeText={amount => setAmount(amount)}
+                        theme={{
+                            colors: {
+                              primary: "rgb(120, 69, 172)",
+                              onPrimary: "rgb(255, 255, 255)",
+                              primaryContainer: "rgb(240, 219, 255)",
+                              onPrimaryContainer: "rgb(44, 0, 81)",
+                              secondary: "rgb(102, 90, 111)",
+                              onSecondary: "rgb(255, 255, 255)",
+                              background: "rgb(255, 251, 255)",
+                              onBackground: "rgb(29, 27, 30)",
+                              surface: "rgb(255, 251, 255)",
+                              onSurface: "rgb(29, 27, 30)",
+                              surfaceVariant: "rgb(233, 223, 235)",
+                              onSurfaceVariant: "rgb(74, 69, 78)",
+                              outline: "rgb(124, 117, 126)",
+                              outlineVariant: "rgb(204, 196, 206)",
+                              shadow: "rgb(0, 0, 0)",
+                              scrim: "rgb(0, 0, 0)",
+                              elevation: {
+                                level0: "transparent",
+                                level1: "rgb(248, 242, 251)",
+                                level2: "rgb(244, 236, 248)",
+                                level3: "rgb(240, 231, 246)",
+                                level4: "rgb(239, 229, 245)",
+                                level5: "rgb(236, 226, 243)"
+                              },
+                              surfaceDisabled: "rgba(29, 27, 30, 0.12)",
+                              onSurfaceDisabled: "rgba(29, 27, 30, 0.38)",
+                              backdrop: "rgba(51, 47, 55, 0.4)"
+                            }
+                        }}
                         />
                     </View>
 
-                    <Text style={styles.Label}>Sender's Number:</Text>
                     <View style={styles.action}>
-                        <TextInput 
-                            placeholder="Input Sender's Phone"
-                            style={styles.textInput}
-                            value={phone}
-                            onChangeText={setPhone}
-                            keyboardType='numeric'
-                            placeholderTextColor={'grey'}
+                        <TextInput
+                        label="Sender's Phone"
+                        value={phone}
+                        underlineColor={'#209eda'}
+                        activeUnderlineColor={'#475980'}
+                        activeOutlineColor={'#5cdb93'}
+                        outlineColor={'#ffffff'}
+                        backgroundColor={'#ffffff'}
+                        keyboardType='numeric'
+                        style={styles.inputSender}
+                        onChangeText={phone => setPhone(phone)}
+                        theme={{
+                            colors: {
+                              primary: "rgb(120, 69, 172)",
+                              onPrimary: "rgb(255, 255, 255)",
+                              primaryContainer: "rgb(240, 219, 255)",
+                              onPrimaryContainer: "rgb(44, 0, 81)",
+                              secondary: "rgb(102, 90, 111)",
+                              onSecondary: "rgb(255, 255, 255)",
+                              background: "rgb(255, 251, 255)",
+                              onBackground: "rgb(29, 27, 30)",
+                              surface: "rgb(255, 251, 255)",
+                              onSurface: "rgb(29, 27, 30)",
+                              surfaceVariant: "rgb(233, 223, 235)",
+                              onSurfaceVariant: "rgb(74, 69, 78)",
+                              outline: "rgb(124, 117, 126)",
+                              outlineVariant: "rgb(204, 196, 206)",
+                              shadow: "rgb(0, 0, 0)",
+                              scrim: "rgb(0, 0, 0)",
+                              elevation: {
+                                level0: "transparent",
+                                level1: "rgb(248, 242, 251)",
+                                level2: "rgb(244, 236, 248)",
+                                level3: "rgb(240, 231, 246)",
+                                level4: "rgb(239, 229, 245)",
+                                level5: "rgb(236, 226, 243)"
+                              },
+                              surfaceDisabled: "rgba(29, 27, 30, 0.12)",
+                              onSurfaceDisabled: "rgba(29, 27, 30, 0.38)",
+                              backdrop: "rgba(51, 47, 55, 0.4)"
+                            }
+                        }}
                         />
+                        {
+                            validateMsisdn == '' ? 
+                            <></>
+                            : validateMsisdn == 'validating' ?
+                            <HelperText type="info" visible={true}>
+                                <View style={styles.loadingIndicator}>
+                                    <ActivityIndicator color="#209eda" />
+                                </View>
+                            </HelperText>
+                            :
+                            <HelperText type="info" visible={true} style={styles.senderText}>
+                                {senderName}
+                            </HelperText>
+                        }
                     </View>
 
-                    <Text style={styles.Label}>Sender's Pin:</Text>
                     <View style={styles.action}>
-                        <TextInput 
-                            placeholder="Input Sender's Pin"
-                            style={styles.textInput}
-                            value={pin}
-                            keyboardType='numeric'
-                            onChangeText={setPin}
-                            maxLength={4}
-                            secureTextEntry
-                            placeholderTextColor={'grey'}
+                        <TextInput
+                        label="Sender's Pin"
+                        value={pin}
+                        secureTextEntry={secureTextEntry ? true : false}
+                        underlineColor={'#209eda'}
+                        activeUnderlineColor={'#475980'}
+                        activeOutlineColor={'#5cdb93'}
+                        outlineColor={'#ffffff'}
+                        backgroundColor={'#ffffff'}
+                        keyboardType='numeric'
+                        style={styles.inputPin}
+                        onChangeText={pin => setPin(pin)}
+                        theme={{
+                            colors: {
+                              primary: "rgb(120, 69, 172)",
+                              onPrimary: "rgb(255, 255, 255)",
+                              primaryContainer: "rgb(240, 219, 255)",
+                              onPrimaryContainer: "rgb(44, 0, 81)",
+                              secondary: "rgb(102, 90, 111)",
+                              onSecondary: "rgb(255, 255, 255)",
+                              background: "rgb(255, 251, 255)",
+                              onBackground: "rgb(29, 27, 30)",
+                              surface: "rgb(255, 251, 255)",
+                              onSurface: "rgb(29, 27, 30)",
+                              surfaceVariant: "rgb(233, 223, 235)",
+                              onSurfaceVariant: "rgb(74, 69, 78)",
+                              outline: "rgb(124, 117, 126)",
+                              outlineVariant: "rgb(204, 196, 206)",
+                              shadow: "rgb(0, 0, 0)",
+                              scrim: "rgb(0, 0, 0)",
+                              elevation: {
+                                level0: "transparent",
+                                level1: "rgb(248, 242, 251)",
+                                level2: "rgb(244, 236, 248)",
+                                level3: "rgb(240, 231, 246)",
+                                level4: "rgb(239, 229, 245)",
+                                level5: "rgb(236, 226, 243)"
+                              },
+                              surfaceDisabled: "rgba(29, 27, 30, 0.12)",
+                              onSurfaceDisabled: "rgba(29, 27, 30, 0.38)",
+                              backdrop: "rgba(51, 47, 55, 0.4)"
+                            }
+                        }}
                         />
                     </View>
                     
 
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         onPress={onProceed}
                         style={styles.signInbutton}
                     >
@@ -127,7 +328,17 @@ const Payment = ({ navigation }) => {
                                     <Text style={styles.signIn}>Proceed</Text>
                                 )
                             }
-                        {/* </LinearGradient> */}
+                    </TouchableOpacity> */}
+                    <TouchableOpacity style={styles.submitSection} onPress={() => onProceed()}>
+                        { loading ?
+                            <Button icon="phone-in-talk" mode="contained" buttonColor={'#209eda'}>
+                                <ActivityIndicator color="white" />
+                            </Button>:
+                            <Button icon="phone-in-talk" mode="contained" buttonColor={'#209eda'}>
+                                Initiate Pay
+                            </Button> 
+                        }
+                        
                     </TouchableOpacity>
                     </View>
                 {/* </View> */}
@@ -147,67 +358,92 @@ const styles = StyleSheet.create({
 		backgroundColor: 'white',
         
     },
-    Label:{
-        fontWeight: 'bold',
-        marginBottom:3,
-        alignItems: 'flex-start',
-        color: 'rgb(71, 85, 105)',
-        fontSize: 17
-    },
-    paymentPlan:{
-        paddingTop: 15,
-        paddingHorizontal: 25,
-    },
-    button: {
-        alignItems: 'center',
+    inputSender:{
+        width:'90%',
+        alignSelf: 'center',
         marginTop: 80
     },
-    signInbutton: {
-        marginTop: 30,
-        backgroundColor: 'rgb(96, 165, 250)',
-        padding: 20,
-        borderRadius: 10,
-        marginBottom: 30,
-    },
-    signIn: {
-        textAlign: 'center',
-        fontWeight: '700',
-        fontSize: 18,
-        color: 'white',
-        alignItems: 'center',
-    },
-    textSign: {
-        fontSize: 18,
-        fontWeight: 'bold'
-    },
-    action: {
-        flexDirection: 'row',
-        marginTop: 5,
-        // borderBottomColor: 'green',
-        paddingBottom: 5,
-    },
-    textInput: {
+    modal:{
         flex: 1,
-        marginTop: Platform.OS === 'ios' ? 0 : -12,
-        paddingLeft: 10,
-        alignItems: 'center',
-        marginTop: 8,
-        marginVertical: 5,
-        width: 350,
+        alignContent:'center',
+        alignItems:'center',
+        // verticalAlign:'center',
+        // margin: 20,
+        padding: 15,
+        marginVertical: Platform.OS === 'ios' ? 260 : 240,
+        // marginVertical: 260,
+        borderRadius: 5,
+        borderColor: '#4772E1',
         borderWidth: 1,
-        borderColor: 'rgb(209, 213, 219)',
-        borderRadius: 10,
-        paddingVertical: 15,
-        paddingHorizontal: 25,
-        marginBottom: 15 ,
-        fontSize:16
+        borderRadius: 20,
+        backgroundColor: '#ffffff'
     },
-    bottomContainer: {
-        flex: 1,
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-        paddingHorizontal: 20,
-        paddingVertical: 30,
+    modalIcon:{
+        marginBottom: 20
+    },
+    modalButtonsOne:{
+        marginRight:10
+    },
+    modalButtonsOkay:{
+        marginTop: 30
+    },
+    modalErrorMessage:{
+        marginBottom: 20
+    },
+    theView:{
+        flex:1,
+        alignContent: 'center',
+        textAlign: 'center',
+    },
+    inputAmount:{
+        width:'90%',
+        alignSelf: 'center',
+        marginTop: 60
+    },
+    modalButtons:{
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        // width:'91.5%',
+        // left:15,
+        display: 'flex',
+        alignItems: 'center',
+        alignContent: 'center',
+        marginTop: 25
+    },
+    inputPin:{
+        width:'90%',
+        alignSelf: 'center',
+        marginTop: 80,
+        marginBottom: 20
+    },
+    submitSection:{
+        width:'60%',
+        alignSelf: 'center',
+        marginTop: 60
+    },
+    contain:{
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        width:'91.5%',
+        left:15,
+        display: 'flex',
+        alignItems: 'center',
+    },
+    senderText:{
+        color:'#000000',
+        textColor: '#000000'
+    },
+    pinToggle:{
+        marginTop:40,
+        display: 'flex',
+        alignItems: 'center',
+        width:'91.5%',
+    },
+    pinToggleSwitch:{
+        marginLeft: 'auto',
+    },
+    toggleHelper:{
+        marginLeft: 'auto',
     },
 
 })

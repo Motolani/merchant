@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Dimensions, Platform, FlatList, ActivityIndicator } from 'react-native'
+import {  View, StyleSheet, TouchableOpacity, StatusBar, ScrollView, Image, ImageBackground, Dimensions, ActivityIndicator, Platform} from 'react-native'
 import React, { useState, useContext, useEffect } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons';
 import  Feather  from 'react-native-vector-icons/Feather';
@@ -8,18 +8,27 @@ import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme, Avatar, Button, Card, Text, DataTable, IconButton, MD3Colors, PaperProvider } from 'react-native-paper';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('screen').width;
 const screenHeight = Dimensions.get('screen').height; 
 
-const WalletHistory = () => {  
+const WalletHistory = ({ navigation }) => {  
     const [search, setSearch] = useState('');
     const [walletHistoryTransactions, setWalletHistoryTransactions] = useState([]);
     const [loading, setLoading] = useState(false)
     const { msisdn, userToken, signOut } = useContext(AuthContext); 
+    const [page, setPage] = useState(0);
+    const [numberOfItemsPerPageList] = useState([10,15]);
+    const [itemsPerPage, onItemsPerPageChange] = useState(
+        numberOfItemsPerPageList[0]
+    );
+    const theme = useTheme();
 
+    const from = page * itemsPerPage;
+const to = Math.min((page + 1) * itemsPerPage, walletHistoryTransactions.length);
 
     const WalletHistoryTrans = async () => {
 
@@ -70,259 +79,290 @@ const WalletHistory = () => {
 
     if(walletHistoryTransactions.length < 1){
         return(
-            <SafeAreaView className="h-full">
-                {
-                    !loading ? (
-                        <View className="justify-center items-center h-full">
-                            <Text>No transactions was found</Text>
-                        </View>
-                    ): (
-                        <View className="justify-center items-center h-full">
-                            <ActivityIndicator size="large" color="rgb(96, 165, 250)" />
-                        </View>
-                    )
-                }
+            // <SafeAreaView className="h-full" style={styles.contain}>
+                <PaperProvider>
+                    <View style={styles.general}>
+                    {
+                        !loading ? (
+                            <View style={styles.general}>
+                                <ScrollView className="justify-center items-center h-full">
+                                    <View style={styles.datatable}>
+                                        <DataTable style={styles.general}>
+                                        <DataTable.Header>
+                                            <DataTable.Title ><Text style={styles.textish}>Date</Text></DataTable.Title>
+                                            <DataTable.Title numeric><Text style={styles.textish}>amount</Text></DataTable.Title>
+                                            <DataTable.Title numeric><Text style={styles.textish}>status</Text></DataTable.Title>
+                                        </DataTable.Header>
 
-            </SafeAreaView>
+                                        {walletHistoryTransactions.slice(from, to).map((item) => (
+                                            <TouchableOpacity onPress = {() => navigation.navigate("TransactionDetails", { transaction: item })}>
+                                                <DataTable.Row key={item.id}>
+                                                    <DataTable.Cell ><Text style={styles.textish}>{item?.TranDate}</Text></DataTable.Cell>
+                                                    <DataTable.Cell numeric><Text style={styles.textish}>N{item?.Amount}</Text></DataTable.Cell>
+                                                    <DataTable.Cell numeric><Text style={styles.textish}>N{item?.Balance}</Text></DataTable.Cell>
+                                                    <DataTable.Cell numeric>
+                                                        {item.status == "C" ?
+                                                            <Text style={styles.success}>Credit</Text>
+                                                            :
+                                                            <Text style={styles.failed}>Debit</Text>
+                                                        }
+                                                    </DataTable.Cell>
+                                                </DataTable.Row>
+                                            </TouchableOpacity>
+                                            
+                                        ))}
+
+                                        <DataTable.Pagination
+                                            page={page}
+                                            numberOfPages={Math.ceil(walletHistoryTransactions.length / itemsPerPage)}
+                                            onPageChange={(page) => setPage(page)}
+                                            label={`${from + 1}-${to} of ${walletHistoryTransactions.length}`}
+                                            numberOfItemsPerPageList={numberOfItemsPerPageList}
+                                            numberOfItemsPerPage={itemsPerPage}
+                                            onItemsPerPageChange={onItemsPerPageChange}
+                                            showFastPaginationControls
+                                            selectPageDropdownLabel={'Rows per page'}
+                                            paginationControlRippleColor={'#209eda'}
+                                            theme={{
+                                                colors: {
+                                                primary: "rgb(120, 69, 172)",
+                                                onPrimary: "rgb(255, 255, 255)",
+                                                primaryContainer: "rgb(240, 219, 255)",
+                                                onPrimaryContainer: "rgb(44, 0, 81)",
+                                                secondary: "rgb(102, 90, 111)",
+                                                onSecondary: "rgb(255, 255, 255)",
+                                                background: "rgb(255, 251, 255)",
+                                                onBackground: "rgb(29, 27, 30)",
+                                                surface: "rgb(255, 251, 255)",
+                                                onSurface: "rgb(29, 27, 30)",
+                                                surfaceVariant: "rgb(233, 223, 235)",
+                                                onSurfaceVariant: "rgb(74, 69, 78)",
+                                                outline: "rgb(124, 117, 126)",
+                                                outlineVariant: "rgb(204, 196, 206)",
+                                                shadow: "rgb(0, 0, 0)",
+                                                scrim: "rgb(0, 0, 0)",
+                                                elevation: {
+                                                    level0: "transparent",
+                                                    level1: "rgb(248, 242, 251)",
+                                                    level2: "rgb(244, 236, 248)",
+                                                    level3: "rgb(240, 231, 246)",
+                                                    level4: "rgb(239, 229, 245)",
+                                                    level5: "rgb(236, 226, 243)"
+                                                },
+                                                surfaceDisabled: "rgba(29, 27, 30, 0.12)",
+                                                onSurfaceDisabled: "rgba(29, 27, 30, 0.38)",
+                                                backdrop: "rgba(51, 47, 55, 0.4)"
+                                                }
+                                            }}
+                                        />
+                                        </DataTable>
+                                    </View>
+                                </ScrollView>
+                            </View>
+                        ): (
+                            <View className="justify-center items-center h-full">
+                                <ActivityIndicator size="large" color="rgb(96, 165, 250)" />
+                            </View>
+                        )
+                    }
+                    </View>
+
+                </PaperProvider>
+            // </SafeAreaView>
         )
     }else {
 
     return (
-        <SafeAreaView className="w-full bg-gray-100">
-            <View className="mt-2">
-            <View className="px-4 mt-1 mb-3">
-                <Text className="text-lg font-semibold text-slate-700">Transaction History</Text>
-            </View>
-                <FlatList
-                    showsVerticalScrollIndicator={false} 
-                    contentContainerStyle={{paddingBottom: 85}}
-                    data={walletHistoryTransactions}
-                    renderItem={({item}) => (                        
-                        <View className="px-3">
-                            {
-                                Platform.OS === 'android' ? (
-                                    <TouchableOpacity key={item.id}   className="flex flex-row h-20 px-2 py-2 items-center border-b border-gray-200 mb-1 bg-white rounded-md">
-                                {item?.DebitCredit == "C" ? (
-                                    <View className="bg-green-200 h-7 w-7 items-center rounded-md justify-center">
-                                        <Feather name="arrow-down-right" color="rgb(34, 197, 94)" size={18} />
-                                    </View>
-                                    ): (
-                                        <View className="bg-red-200 h-7 w-7 items-center rounded-md justify-center">
-                                            <Feather name="arrow-up-right" color="rgb(239, 68, 68)" size={18} />
-                                        </View>
-                                    ) }
-                                <View className="ml-3 justify-center flex-1 space-y-1">
-                                    <Text style={{fontSize: 13}} className="font-semibold  text-gray-400">{item?.TranDate}</Text>
-                                    <View>
-                                        <Text style={{fontSize: 13, lineHeight: 17}} className="text-slate-600 font-semibold">{item?.Description}</Text>
-                                    </View>
-                                </View>
-                                <View className="">
-                                {item?.DebitCredit == "C" ? (
-                                    <Text className="text-green-500  font-bold">+₦{item?.Amount}</Text>
-                                ):(
-                                    <Text className="text-red-500  font-bold">-₦{item?.Amount}</Text>
-                                )}
-                                    <Text className="text-slate-700  font-bold">Bal: {item?.Balance}</Text>
-                                </View>
-                                </TouchableOpacity>
-                                ) : (
-                                    <TouchableOpacity key={item.id}  className="flex flex-row h-20 px-2 py-2 items-center border-b border-gray-200 mb-1 bg-white rounded-md">
-                                {item?.DebitCredit == "C" ? (
-                                    <View className="bg-green-200 h-8 w-8 items-center rounded-md justify-center">
-                                        <Feather name="arrow-down-right" color="rgb(34, 197, 94)" size={18} />
-                                    </View>
-                                    ): (
-                                        <View className="bg-red-200 h-8 w-8 items-center rounded-md justify-center">
-                                            <Feather name="arrow-up-right" color="rgb(239, 68, 68)" size={18} />
-                                        </View>
-                                    ) }
-                                <View className="ml-3 justify-center flex-1 space-y-1">
-                                    <Text className="font-semibold text-gray-400">{item?.TranDate}</Text>
-                                    <View>
-                                        <Text className="text-slate-600 font-semibold">{item?.Description}</Text>
-                                    </View>
-                                </View>
-                                <View className="">
-                                {item?.DebitCredit == "C" ? (
-                                    <Text className="text-green-500 text-base font-bold">+₦{item?.Amount}</Text>
-                                ):(
-                                    <Text className="text-red-500 text-base font-bold">-₦{item?.Amount}</Text>
-                                )}
-                                    <Text className="text-slate-700 text-base font-bold">Bal: {item?.Balance}</Text>
-                                </View>
-                                </TouchableOpacity>
-                                )
-                            }
+        <PaperProvider>
+            { walletHistoryTransactions ?
+                <View >
+                    <ScrollView>
+                        <View style={styles.datatable}>
+                            <DataTable>
+                            <DataTable.Header>
+                                {/* <DataTable.Title >Id</DataTable.Title> */}
+                                <DataTable.Title > <Text style={styles.textColoring}>  Date </Text></DataTable.Title>
+                                <DataTable.Title numeric> <Text style={styles.textColoring}> amount </Text></DataTable.Title>
+                                <DataTable.Title numeric> <Text style={styles.textColoring}> status </Text></DataTable.Title>
+                            </DataTable.Header>
 
+                            {walletHistoryTransactions.slice(from, to).map((item) => (
+                                <TouchableOpacity onPress = {() => navigation.navigate("TransactionDetails", { transaction: item })}>
+                                    <DataTable.Row key={item.id}>
+                                        <DataTable.Cell > <Text style={styles.textColoring}> {item?.TranDate} </Text></DataTable.Cell>
+                                        <DataTable.Cell numeric> <Text style={styles.textColoring}> N{item?.Amount} </Text></DataTable.Cell>
+                                        <DataTable.Cell numeric> <Text style={styles.textColoring}> N{item?.Balance} </Text></DataTable.Cell>
+                                        <DataTable.Cell numeric>
+                                            {item.status == "C" ?
+                                                <Text style={styles.success}>Credit</Text>
+                                                :
+                                                <Text style={styles.failed}>Debit</Text>
+                                            }
+                                        </DataTable.Cell>
+                                    </DataTable.Row>
+                                </TouchableOpacity>
+                                
+                            ))}
+
+                            <DataTable.Pagination
+                                page={page}
+                                numberOfPages={Math.ceil(walletHistoryTransactions.length / itemsPerPage)}
+                                onPageChange={(page) => setPage(page)}
+                                label={`${from + 1}-${to} of ${walletHistoryTransactions.length}`}
+                                numberOfItemsPerPageList={numberOfItemsPerPageList}
+                                numberOfItemsPerPage={itemsPerPage}
+                                onItemsPerPageChange={onItemsPerPageChange}
+                                showFastPaginationControls
+                                selectPageDropdownLabel={'Rows per page'}
+                                paginationControlRippleColor={'#209eda'}
+                                theme={{
+                                    colors: {
+                                      primary: "rgb(120, 69, 172)",
+                                      onPrimary: "rgb(255, 255, 255)",
+                                      primaryContainer: "rgb(240, 219, 255)",
+                                      onPrimaryContainer: "rgb(44, 0, 81)",
+                                      secondary: "rgb(102, 90, 111)",
+                                      onSecondary: "rgb(255, 255, 255)",
+                                      background: "rgb(255, 251, 255)",
+                                      onBackground: "rgb(29, 27, 30)",
+                                      surface: "rgb(255, 251, 255)",
+                                      onSurface: "rgb(29, 27, 30)",
+                                      surfaceVariant: "rgb(233, 223, 235)",
+                                      onSurfaceVariant: "rgb(74, 69, 78)",
+                                      outline: "rgb(124, 117, 126)",
+                                      outlineVariant: "rgb(204, 196, 206)",
+                                      shadow: "rgb(0, 0, 0)",
+                                      scrim: "rgb(0, 0, 0)",
+                                      elevation: {
+                                        level0: "transparent",
+                                        level1: "rgb(248, 242, 251)",
+                                        level2: "rgb(244, 236, 248)",
+                                        level3: "rgb(240, 231, 246)",
+                                        level4: "rgb(239, 229, 245)",
+                                        level5: "rgb(236, 226, 243)"
+                                      },
+                                      surfaceDisabled: "rgba(29, 27, 30, 0.12)",
+                                      onSurfaceDisabled: "rgba(29, 27, 30, 0.38)",
+                                      backdrop: "rgba(51, 47, 55, 0.4)"
+                                    }
+                                }}
+                            />
+                            </DataTable>
                         </View>
-                    )}
-                    keyExtractor={(item, index) => item.id}
+                        {/* <TouchableOpacity onPress={() => getTrans()}>
+                            <Button>
+                            test
+                                
+                            </Button>
+                        </TouchableOpacity> */}
+                    </ScrollView>
                     
-                />
-
-            </View>
-        </SafeAreaView>
+                </View>
+                :
+            
+                <View style={styles.loadingIndicator}>
+                    <ActivityIndicator color="#209eda" />
+                </View>
+            }
+        </PaperProvider>
     )
-}
+    }
 }
 
 export default WalletHistory
 
 const { height, width } = Dimensions.get("window");
 
-
 const styles = StyleSheet.create({
-    searchBar:{
-        flexDirection: 'row',
-        // flexWrap: 'wrap',
-    },
-    customInput:{
-        backgroundColor: "#FFFFFF",
-        marginTop: 8,
-        marginVertical: 5,
-        // width: "100%",
-        // borderColor: '#0073e6',
-        borderWidth: 1,
-        borderRadius: 13,
-        paddingVertical: 15,
-        paddingHorizontal: 25,
-        marginBottom: 25 ,
+    contain: {
+		flex: 1, 
+		backgroundColor: '#ffffff',
         
-    },
-    timestampDay:{
-        color: 'black',
-        fontWeight: '700',
-        fontSize: 14,
-        paddingLeft: 50
-    },
-    Label:{
-        color: 'rgba(71, 114, 225, 1)',
-        fontWeight: 'bold',
-        marginLeft: 14,
-        color: '#0073e6',
-        
-    },
-    searchButtonContainer:{
-        width: hp('6%'),
-        height: hp('5%'),
-        borderRadius: 10,
-        marginTop: 10,
-        borderColor: '#0073e6',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#0073e6',
-    },
-    searchButtonView:{
-        paddingLeft: 10,
-        height: 12
-    },
-    theTransCase:{
-        flex: 1,
-        marginBottom: 2
-    },
-    historiesContainer:{
-        width: 380,
-        height: 120,
-        backgroundColor: '#e0e0eb',
-        borderRadius: 10,
-        marginTop: 5,
-        borderColor: 'green',
-        borderWidth: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-    },
-    historiesContainerC:{
-        width: "100%",
-        height: 120,
-        backgroundColor: '#e0e0eb',
-        borderRadius: 10,
-        marginTop: 5,
-        borderColor: 'green',
-        borderWidth: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-    },
-    historiesContainerD:{
-        width: "100%",
-        height: 120,
-        backgroundColor: '#e0e0eb',
-        borderRadius: 10,
-        marginTop: 5,
-        borderColor: 'red',
-        borderWidth: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-    },
-    typeIconContainer:{
-        marginTop: 10,
-        marginLeft: 3,
-        marginRight: 18,
-        justifyContent: "center",
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 6,
-        alignContent: 'space-between'
     },
     general:{
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        marginTop: -42,
+        backgroundColor:'#ffffff',
     },
-    generalTop:{
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        marginTop:3,
+    time:{
     },
-    topRow:{
-        flexDirection: 'row',
-        justifyContent: "space-between",
-        alignItems: "flex-start",
-        marginTop: 20
+    Label:{
+        fontWeight: 'bold',
+        marginBottom:3,
+        alignItems: 'flex-start',
+        color: 'rgb(71, 85, 105)',
+        fontSize: 17
     },
-    transTheType:{
-        fontWeight: '600',
+    textColoring:{
+        color:'#000000',
+        textColor: '#000000'
+    },
+    loadingIndicator:{
+        marginTop: 30,
+        backgroundColor:'#ffffff',
+    },
+    success:{
+        color: 'green'
+    },
+    failed:{
+        color: 'red'
+    },
+    paymentPlan:{
+        paddingTop: 15,
+        paddingHorizontal: 25,
+    },
+    button: {
+        alignItems: 'center',
+        marginTop: 80
+    },
+    datatable:{
+        marginTop: 20,
+        
+    },
+    signInbutton: {
+        marginTop: 30,
+        backgroundColor: 'rgb(96, 165, 250)',
+        padding: 20,
+        borderRadius: 10,
+        marginBottom: 30,
+    },
+    signIn: {
+        textAlign: 'center',
+        fontWeight: '700',
         fontSize: 18,
-        marginRight: 30,
-        color: 'black',
+        color: 'white',
+        alignItems: 'center',
     },
-    theAmountContainer:{
-        paddingTop: 13
-    },
-    theAmount:{
-        fontWeight: '600', 
-        color: 'black',
-        fontSize: 14,
-        marginRight: 10,
-    },
-    downRow:{
-        paddingLeft: 55
-    },
-    reciever:{
-        fontWeight: '500',
-        marginTop: 20, 
+    textSign: {
         fontSize: 18,
-        marginLeft: 22,
-        color: 'black',
+        fontWeight: 'bold'
     },
-    desc: {
-        marginTop: 15, 
-        color: 'black',
-        marginLeft: 5
+    action: {
+        flexDirection: 'row',
+        marginTop: 5,
+        // borderBottomColor: 'green',
+        paddingBottom: 5,
     },
-    mainHead: {
-        justifyContent: "center",
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 6,
-        paddingTop: 0,
-        margingLeft: 35,
-        alignContent: 'space-around'
+    textInput: {
+        flex: 1,
+        marginTop: Platform.OS === 'ios' ? 0 : -12,
+        paddingLeft: 10,
+        alignItems: 'center',
+        marginTop: 8,
+        marginVertical: 5,
+        width: 350,
+        borderWidth: 1,
+        borderColor: 'rgb(209, 213, 219)',
+        borderRadius: 10,
+        paddingVertical: 15,
+        paddingHorizontal: 25,
+        marginBottom: 15 ,
+        fontSize:16
     },
+    bottomContainer: {
+        flex: 1,
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
+        paddingHorizontal: 20,
+        paddingVertical: 30,
+    },
+
 })

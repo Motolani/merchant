@@ -12,6 +12,9 @@ import Dash from './Dash';
 import WalletHistory from './WalletHistory';
 import Ionic from 'react-native-vector-icons/Ionicons';
 import Payment from './Payment';
+import Settings from './Settings';
+import Icon from 'react-native-vector-icons/Ionicons';
+
 
 const Dashboard = ({ navigation }) => {
 
@@ -19,67 +22,14 @@ const Dashboard = ({ navigation }) => {
 
     /* const BottomTabScreen = () => { */
 		return (
-			// <Tab.Navigator
-			// 	screenOptions={({ route }) => ({
-			// 		headerShown: false,
-			// 		tabBarStyle: {
-			// 			height: 90,
-            //             backgroundColor: '#0098DB ',
-			// 		},
-
-			// 		tabBarIcon: ({ focused, size, color }) => {
-			// 			let iconName;
-			// 			if (route.name === 'Home') {
-			// 				iconName = focused ? "home" : "home-outline";
-			// 				size = focused ? size + 8 : size + 2;
-            //                 color = 'white';
-			// 			} else if (route.name === 'History') {
-			// 				iconName = focused ? 'ios-timer' : 'ios-timer-outline';
-			// 				size = focused ? size + 8 : size + 2;
-            //                 color = 'white';
-			// 			}
-
-			// 			return <Ionic name={iconName} size={size} color={color} />
-			// 		}
-
-			// 	})}
-                
-            //     >
-
-			// 	<Tab.Screen options={{ 
-            //             tabBarStyle:{backgroundColor: '#155ae4', height: 80}, 
-            //             tabBarActiveTintColor: 'white', 
-            //             tabBarInactiveTintColor:'white',
-            //             tabBarLabelStyle:{
-            //                 paddingBottom: 7,
-            //                 fontSize: 14
-            //             }
-            //         }}
-            //         name='Home' component={Dash} 
-            //     />
-            //     <Tab.Screen options={{ 
-            //             tabBarStyle:{backgroundColor: '#155ae4', height: 80}, 
-            //             tabBarActiveTintColor: 'white', 
-            //             tabBarInactiveTintColor:'white',
-            //             tabBarLabelStyle:{
-            //                 paddingBottom: 7,
-            //                 fontSize: 14
-            //             }
-            //         }}
-            //         name='History' component={WalletHistory} 
-            //     />
-            //     {/* <Tab.Screen options={{ headerShown: false, headerStyle: { backgroundColor: '#b3d9ff', }}} name='Profile' component={Profile} /> */}
-
-			// </Tab.Navigator>
-
-
+			
             <Tab.Navigator
                 screenOptions={({ route }) => ({
                     headerShown: false,
-                    tabBarStyle: {
-                        height: 50,
-                        alignItems: 'center',
-                    },
+                    // tabBarStyle: {
+                    //     height: 50,
+                    //     alignItems: 'center',
+                    // },
                     // tabBarShowLabel: false,
 
                     tabBarIcon: ({ focused, size, color }) => {
@@ -98,6 +48,11 @@ const Dashboard = ({ navigation }) => {
                             size = size - 1;
                             // color = 'white';
                         }
+                        else if (route.name === 'Settings') {
+                            iconName = 'cogs';
+                            size = size - 1;
+                            // color = 'white';
+                        }
 
                         return <FontAwesome name={iconName} size={size} color={color} />
                     }
@@ -110,10 +65,11 @@ const Dashboard = ({ navigation }) => {
                     tabBarInactiveTintColor:'rgb(75, 85, 99)',
                     tabBarLabelStyle:{
                         paddingBottom: 5,
-                        // paddingTop: 2,
+                        paddingTop: 2,
                         fontSize: 12,
                         fontWeight: '600'
                     },
+
             }}
             name="Home" component={Dash} />
             <Tab.Screen 
@@ -125,6 +81,7 @@ const Dashboard = ({ navigation }) => {
                         // fontSize: 12,
                         fontWeight: '600',
                     },
+                    
                 }}      
             name="Payment" component={Payment} />
             <Tab.Screen 
@@ -138,6 +95,17 @@ const Dashboard = ({ navigation }) => {
                     },
                 }}      
             name="History" component={WalletHistory} />
+            <Tab.Screen 
+                options={{
+                    tabBarActiveTintColor: 'rgb(96, 165, 250)', 
+                    tabBarInactiveTintColor:'rgb(75, 85, 99)',
+                    tabBarLabelStyle:{
+                        paddingBottom: 5,
+                        // fontSize: 12,
+                        fontWeight: '600',
+                    },
+                }}      
+            name="Settings" component={Settings} />
 
           </Tab.Navigator>
 		)

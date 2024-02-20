@@ -75,7 +75,6 @@ PODS:
     - FlipperKit/FlipperKitNetworkPlugin
   - fmt (6.2.1)
   - glog (0.3.5)
-  - hermes-engine (0.70.9)
   - libevent (2.1.12)
   - OpenSSL-Universal (1.1.1100)
   - RCT-Folly (2021.07.22.00):
@@ -89,12 +88,6 @@ PODS:
     - DoubleConversion
     - fmt (~> 6.2.1)
     - glog
-  - RCT-Folly/Futures (2021.07.22.00):
-    - boost
-    - DoubleConversion
-    - fmt (~> 6.2.1)
-    - glog
-    - libevent
   - RCTRequired (0.70.9)
   - RCTTypeSafety (0.70.9):
     - FBLazyVector (= 0.70.9)
@@ -272,17 +265,6 @@ PODS:
     - React-logger (= 0.70.9)
     - React-perflogger (= 0.70.9)
     - React-runtimeexecutor (= 0.70.9)
-  - React-hermes (0.70.9):
-    - DoubleConversion
-    - glog
-    - hermes-engine
-    - RCT-Folly (= 2021.07.22.00)
-    - RCT-Folly/Futures (= 2021.07.22.00)
-    - React-cxxreact (= 0.70.9)
-    - React-jsi (= 0.70.9)
-    - React-jsiexecutor (= 0.70.9)
-    - React-jsinspector (= 0.70.9)
-    - React-perflogger (= 0.70.9)
   - React-jsi (0.70.9):
     - boost (= 1.76.0)
     - DoubleConversion
@@ -304,7 +286,9 @@ PODS:
   - React-jsinspector (0.70.9)
   - React-logger (0.70.9):
     - glog
-  - react-native-safe-area-context (4.7.4):
+  - react-native-image-base64 (0.1.4):
+    - React
+  - react-native-safe-area-context (4.8.2):
     - React-Core
   - React-perflogger (0.70.9)
   - React-RCTActionSheet (0.70.9):
@@ -372,9 +356,15 @@ PODS:
     - React-jsi (= 0.70.9)
     - React-logger (= 0.70.9)
     - React-perflogger (= 0.70.9)
-  - RNCAsyncStorage (1.18.1):
+  - RNBluetoothStateManager (1.3.5):
     - React-Core
-  - RNScreens (3.27.0):
+  - RNCAsyncStorage (1.21.0):
+    - React-Core
+  - RNCClipboard (1.13.2):
+    - React-Core
+  - RNCPicker (2.6.1):
+    - React-Core
+  - RNScreens (3.29.0):
     - React-Core
     - React-RCTImage
   - RNVectorIcons (9.2.0):
@@ -414,8 +404,6 @@ DEPENDENCIES:
   - FlipperKit/FlipperKitUserDefaultsPlugin (= 0.125.0)
   - FlipperKit/SKIOSNetworkPlugin (= 0.125.0)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
-  - hermes-engine (from `../node_modules/react-native/sdks/hermes/hermes-engine.podspec`)
-  - libevent (~> 2.1.12)
   - OpenSSL-Universal (= 1.1.1100)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTRequired (from `../node_modules/react-native/Libraries/RCTRequired`)
@@ -429,11 +417,11 @@ DEPENDENCIES:
   - React-Core/RCTWebSocket (from `../node_modules/react-native/`)
   - React-CoreModules (from `../node_modules/react-native/React/CoreModules`)
   - React-cxxreact (from `../node_modules/react-native/ReactCommon/cxxreact`)
-  - React-hermes (from `../node_modules/react-native/ReactCommon/hermes`)
   - React-jsi (from `../node_modules/react-native/ReactCommon/jsi`)
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
+  - react-native-image-base64 (from `../node_modules/react-native-image-base64`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
@@ -447,7 +435,10 @@ DEPENDENCIES:
   - React-RCTVibration (from `../node_modules/react-native/Libraries/Vibration`)
   - React-runtimeexecutor (from `../node_modules/react-native/ReactCommon/runtimeexecutor`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - RNBluetoothStateManager (from `../node_modules/react-native-bluetooth-state-manager`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
+  - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
+  - "RNCPicker (from `../node_modules/@react-native-picker/picker`)"
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - TouchID (from `../node_modules/react-native-touch-id`)
@@ -484,8 +475,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/React/FBReactNativeSpec"
   glog:
     :podspec: "../node_modules/react-native/third-party-podspecs/glog.podspec"
-  hermes-engine:
-    :podspec: "../node_modules/react-native/sdks/hermes/hermes-engine.podspec"
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTRequired:
@@ -506,8 +495,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/React/CoreModules"
   React-cxxreact:
     :path: "../node_modules/react-native/ReactCommon/cxxreact"
-  React-hermes:
-    :path: "../node_modules/react-native/ReactCommon/hermes"
   React-jsi:
     :path: "../node_modules/react-native/ReactCommon/jsi"
   React-jsiexecutor:
@@ -516,6 +503,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
   React-logger:
     :path: "../node_modules/react-native/ReactCommon/logger"
+  react-native-image-base64:
+    :path: "../node_modules/react-native-image-base64"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   React-perflogger:
@@ -542,8 +531,14 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/runtimeexecutor"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  RNBluetoothStateManager:
+    :path: "../node_modules/react-native-bluetooth-state-manager"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
+  RNCClipboard:
+    :path: "../node_modules/@react-native-clipboard/clipboard"
+  RNCPicker:
+    :path: "../node_modules/@react-native-picker/picker"
   RNScreens:
     :path: "../node_modules/react-native-screens"
   RNVectorIcons:
@@ -571,7 +566,6 @@ SPEC CHECKSUMS:
   FlipperKit: cbdee19bdd4e7f05472a66ce290f1b729ba3cb86
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
-  hermes-engine: 918ec5addfbc430c9f443376d739f088b6dc96c3
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
   RCT-Folly: 0080d0a6ebf2577475bda044aa59e2ca1f909cda
@@ -584,12 +578,12 @@ SPEC CHECKSUMS:
   React-Core: b1e6334eedacb3dc3adae163ccdde5e6ca26d18b
   React-CoreModules: 74122da11de87771f2461c757ab0c29defddd4ea
   React-cxxreact: bbca1cdf5165761529edff94ed117b95ccbc877a
-  React-hermes: ee7245fc80f61eee8918a5046ed84b0b740a15f4
   React-jsi: a015cacfe56047914e425d0177133c35409e2462
   React-jsiexecutor: d3f6d9242d4c93e7f0bdb27cb5510003bc98445c
   React-jsinspector: d76d32327f21d4f40dcf696231fdbbca60de4711
   React-logger: 1b3522f1e05c6360e93df3607a016c39e30a7351
-  react-native-safe-area-context: 2cd91d532de12acdb0a9cbc8d43ac72a8e4c897c
+  react-native-image-base64: 2ff9ac788639c87a91361ab6652cc95e871b1e54
+  react-native-safe-area-context: 0ee144a6170530ccc37a0fd9388e28d06f516a89
   React-perflogger: cce000b5caa4bcecbb29ee9cfdb47f26202d2599
   React-RCTActionSheet: ba29f52a82d970e2aba5804490ecaea587c7a751
   React-RCTAnimation: 36efe35933875c9aeea612f7d2c0394fa22552c1
@@ -602,14 +596,17 @@ SPEC CHECKSUMS:
   React-RCTVibration: 7fee53a28038a1b3c5c66dfd7656e29ac6d5c04d
   React-runtimeexecutor: ed23be8c1e02b73e7e2f88ac7eaab8faf6961a38
   ReactCommon: 153bd73ed963731a8e3e7f03a747b353fed7363e
-  RNCAsyncStorage: b90b71f45b8b97be43bc4284e71a6af48ac9f547
-  RNScreens: 2b19e2471db8a581c83f381f4ea5d43071c9a3bf
+  RNBluetoothStateManager: 724f2c76b04e0a2b840dfd7305b68f614bc01c81
+  RNCAsyncStorage: 618d03a5f52fbccb3d7010076bc54712844c18ef
+  RNCClipboard: 60fed4b71560d7bfe40e9d35dea9762b024da86d
+  RNCPicker: b18aaf30df596e9b1738e7c1f9ee55402a229dca
+  RNScreens: fa9b582d85ae5d62c91c66003b5278458fed7aaa
   RNVectorIcons: fcc2f6cb32f5735b586e66d14103a74ce6ad61f8
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   TouchID: ba4c656d849cceabc2e4eef722dea5e55959ecf4
   Yoga: dc109b79db907f0f589fc423e991b09ec42d2295
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 772e535a60defd2ac404ef7760edd1a18b271fdd
+PODFILE CHECKSUM: fcb200404d70b859759b6b03e08cc49f936347fb
 
 COCOAPODS: 1.14.2

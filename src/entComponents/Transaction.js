@@ -8,6 +8,7 @@ import Feather from "react-native-vector-icons/Feather"
 import { SelectList } from 'react-native-dropdown-select-list';
 import LinearGradient from 'react-native-linear-gradient';
 import { AuthContext } from '../context/AuthContext';
+
 import { useTheme, Avatar, Button, Card, Text, DataTable, IconButton, MD3Colors, PaperProvider } from 'react-native-paper';
 
 
@@ -72,10 +73,10 @@ const Transaction = ({ navigation }) => {
     //         status: 'success',
     //     },
     // ]);
-       const from = page * itemsPerPage;
-       const to = Math.min((page + 1) * itemsPerPage, transactionsData.length);
-    
-    
+    const from = page * itemsPerPage;
+    const to = Math.min((page + 1) * itemsPerPage, transactionsData.length);
+
+      
     
     const getTrans = async() => {
         setLoading(true)
@@ -104,26 +105,27 @@ const Transaction = ({ navigation }) => {
         setPage(0);
     }, [itemsPerPage]);
 
+    
     return (
         <PaperProvider>
             { transactionsDataStatus ?
-                <View  style={{ backgroundColor: theme.colors.background, flex: 1 }}>
+                <View  >
                     <ScrollView>
                         <View style={styles.datatable}>
                             <DataTable>
                             <DataTable.Header>
                                 {/* <DataTable.Title >Id</DataTable.Title> */}
-                                <DataTable.Title >Date</DataTable.Title>
-                                <DataTable.Title numeric>amount</DataTable.Title>
-                                <DataTable.Title numeric>status</DataTable.Title>
+                                <DataTable.Title > <Text style={styles.textColoring}> Date </Text></DataTable.Title>
+                                <DataTable.Title numeric> <Text style={styles.textColoring}> amount </Text></DataTable.Title>
+                                <DataTable.Title numeric> <Text style={styles.textColoring}> status </Text></DataTable.Title>
                             </DataTable.Header>
 
                             {transactionsData.slice(from, to).map((item) => (
                                 <TouchableOpacity onPress = {() => navigation.navigate('Transaction Details', {transReference: item.reference })}>
                                     <DataTable.Row key={item.id}>
                                         {/* <DataTable.Cell >{item.id}</DataTable.Cell> */}
-                                        <DataTable.Cell >{item.created_at}</DataTable.Cell>
-                                        <DataTable.Cell numeric>N{item.amount}</DataTable.Cell>
+                                        <DataTable.Cell > <Text style={styles.textColoring}> {item.created_at} </Text></DataTable.Cell>
+                                        <DataTable.Cell numeric><Text style={styles.textColoring}> N{item.amount} </Text></DataTable.Cell>
                                         <DataTable.Cell numeric>
                                             {item.status == 1 ?
                                                 <Text style={styles.success}>Successful</Text>
@@ -148,6 +150,37 @@ const Transaction = ({ navigation }) => {
                                 showFastPaginationControls
                                 selectPageDropdownLabel={'Rows per page'}
                                 paginationControlRippleColor={'#209eda'}
+                                theme={{
+                                    colors: {
+                                      primary: "rgb(120, 69, 172)",
+                                      onPrimary: "rgb(255, 255, 255)",
+                                      primaryContainer: "rgb(240, 219, 255)",
+                                      onPrimaryContainer: "rgb(44, 0, 81)",
+                                      secondary: "rgb(102, 90, 111)",
+                                      onSecondary: "rgb(255, 255, 255)",
+                                      background: "rgb(255, 251, 255)",
+                                      onBackground: "rgb(29, 27, 30)",
+                                      surface: "rgb(255, 251, 255)",
+                                      onSurface: "rgb(29, 27, 30)",
+                                      surfaceVariant: "rgb(233, 223, 235)",
+                                      onSurfaceVariant: "rgb(74, 69, 78)",
+                                      outline: "rgb(124, 117, 126)",
+                                      outlineVariant: "rgb(204, 196, 206)",
+                                      shadow: "rgb(0, 0, 0)",
+                                      scrim: "rgb(0, 0, 0)",
+                                      elevation: {
+                                        level0: "transparent",
+                                        level1: "rgb(248, 242, 251)",
+                                        level2: "rgb(244, 236, 248)",
+                                        level3: "rgb(240, 231, 246)",
+                                        level4: "rgb(239, 229, 245)",
+                                        level5: "rgb(236, 226, 243)"
+                                      },
+                                      surfaceDisabled: "rgba(29, 27, 30, 0.12)",
+                                      onSurfaceDisabled: "rgba(29, 27, 30, 0.38)",
+                                      backdrop: "rgba(51, 47, 55, 0.4)"
+                                    }
+                                }}
                             />
                             </DataTable>
                         </View>
@@ -178,10 +211,14 @@ const { height, width } = Dimensions.get("window");
 const styles = StyleSheet.create({
     container: {
 		flex: 1, 
-		// backgroundColor: 'white',
+		backgroundColor: '#ffffff',
         
     },
     time:{
+    },
+    textColoring:{
+        color:'#000000',
+        textColor: '#000000'
     },
     Label:{
         fontWeight: 'bold',
@@ -198,6 +235,10 @@ const styles = StyleSheet.create({
     },
     failed:{
         color: 'red'
+    },
+    textColoring:{
+        color:'#000000',
+        textColor: '#000000'
     },
     paymentPlan:{
         paddingTop: 15,
@@ -227,6 +268,9 @@ const styles = StyleSheet.create({
     textSign: {
         fontSize: 18,
         fontWeight: 'bold'
+    },
+    pending:{
+        color: '#000000'
     },
     action: {
         flexDirection: 'row',
